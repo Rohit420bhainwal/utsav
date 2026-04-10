@@ -40,143 +40,176 @@ class LeadsScreen extends StatelessWidget {
         return ListView.builder(
           padding: const EdgeInsets.all(16),
           itemCount: controller.leads.length,
-          itemBuilder: (context, index) {
+            itemBuilder: (context, index) {
 
-            final lead = controller.leads[index];
+              final lead = controller.leads[index];
 
-            final service = lead["service"];
-            final event = lead["eventDetails"];
+              final service = lead["service"] ?? {};
+              final event = lead["eventDetails"] ?? {};
+              final customer = lead["customer"] ?? {};
+              final user = customer["userId"] ?? {}; // 🔥 populated user
 
-            return GestureDetector(
-              onTap: () {
-                Get.to(() => LeadDetailScreen(), arguments: lead["_id"]);
-              },
-              child: Container(
-                margin: const EdgeInsets.only(bottom: 16),
-                padding: const EdgeInsets.all(16),
+              final title = service["title"] ?? "No Title";
+              final category = service["categoryName"] ?? "";
+              final city = service["city"] ?? "";
 
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(16),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.grey.withOpacity(0.1),
-                      blurRadius: 8,
-                    )
-                  ],
-                ),
+              final eventDateRaw = event["eventDate"];
+              final eventDate = eventDateRaw != null
+                  ? eventDateRaw.toString().substring(0, 10)
+                  : "-";
 
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
+              final guestCount = event["guestCount"]?.toString() ?? "0";
+              final budget = event["budget"]?.toString() ?? "0";
 
-                    /// SERVICE TITLE
-                    Text(
-                      service["title"],
-                      style: const TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
+              final message = lead["message"] ?? "No message";
+              final status = (lead["status"] ?? "new").toString().toUpperCase();
 
-                    const SizedBox(height: 4),
+              final createdAtRaw = lead["createdAt"];
+              final createdAt = createdAtRaw != null
+                  ? createdAtRaw.toString().substring(0, 10)
+                  : "-";
 
-                    Text(
-                      "${service["categoryName"]} • ${service["city"]}",
-                      style: TextStyle(
-                        color: Colors.grey[600],
-                      ),
-                    ),
+              final customerName = user["name"] ?? "Unknown";
 
-                    const SizedBox(height: 12),
+              return GestureDetector(
+                onTap: () {
+                  Get.to(() => LeadDetailScreen(), arguments: lead["_id"]);
+                },
+                child: Container(
+                  margin: const EdgeInsets.only(bottom: 16),
+                  padding: const EdgeInsets.all(16),
 
-                    /// EVENT DETAILS
-                    Row(
-                      children: [
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(16),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.grey.withOpacity(0.1),
+                        blurRadius: 8,
+                      )
+                    ],
+                  ),
 
-                        const Icon(Icons.event, size: 18),
-                        const SizedBox(width: 6),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
 
-                        Text(
-                          event["eventDate"].toString().substring(0,10),
+                      /// 🔹 CUSTOMER NAME (NEW)
+                      Text(
+                        customerName,
+                        style: const TextStyle(
+                          fontSize: 14,
+                          color: Colors.grey,
                         ),
-
-                        const SizedBox(width: 16),
-
-                        const Icon(Icons.people, size: 18),
-                        const SizedBox(width: 6),
-
-                        Text("${event["guestCount"]} guests"),
-                      ],
-                    ),
-
-                    const SizedBox(height: 6),
-
-                    Row(
-                      children: [
-
-                        const Icon(Icons.currency_rupee, size: 18),
-                        const SizedBox(width: 6),
-
-                        Text(event["budget"]),
-                      ],
-                    ),
-
-                    const SizedBox(height: 12),
-
-                    /// MESSAGE
-                    Text(
-                      lead["message"],
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        color: Colors.black87,
                       ),
-                    ),
 
-                    const SizedBox(height: 12),
+                      const SizedBox(height: 4),
 
-                    /// STATUS
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
+                      /// SERVICE TITLE
+                      Text(
+                        title,
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
 
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 10,
-                            vertical: 4,
-                          ),
+                      const SizedBox(height: 4),
 
-                          decoration: BoxDecoration(
-                            color: Colors.green.withOpacity(0.1),
-                            borderRadius: BorderRadius.circular(20),
-                          ),
+                      Text(
+                        "$category • $city",
+                        style: TextStyle(
+                          color: Colors.grey[600],
+                        ),
+                      ),
 
-                          child: Text(
-                            lead["status"].toUpperCase(),
-                            style: const TextStyle(
-                              color: Colors.green,
-                              fontWeight: FontWeight.bold,
+                      const SizedBox(height: 12),
+
+                      /// EVENT DETAILS
+                      Row(
+                        children: [
+
+                          const Icon(Icons.event, size: 18),
+                          const SizedBox(width: 6),
+
+                          Text(eventDate),
+
+                          const SizedBox(width: 16),
+
+                          const Icon(Icons.people, size: 18),
+                          const SizedBox(width: 6),
+
+                          Text("$guestCount guests"),
+                        ],
+                      ),
+
+                      const SizedBox(height: 6),
+
+                      Row(
+                        children: [
+
+                          const Icon(Icons.currency_rupee, size: 18),
+                          const SizedBox(width: 6),
+
+                          Text("₹ $budget"),
+                        ],
+                      ),
+
+                      const SizedBox(height: 12),
+
+                      /// MESSAGE
+                      Text(
+                        message,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          color: Colors.black87,
+                        ),
+                      ),
+
+                      const SizedBox(height: 12),
+
+                      /// STATUS
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 10,
+                              vertical: 4,
+                            ),
+
+                            decoration: BoxDecoration(
+                              color: Colors.green.withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+
+                            child: Text(
+                              status,
+                              style: const TextStyle(
+                                color: Colors.green,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                           ),
-                        ),
 
-                        Text(
-                          lead["createdAt"].toString().substring(0,10),
-                          style: TextStyle(
-                            color: Colors.grey[500],
-                            fontSize: 12,
-                          ),
-                        )
+                          Text(
+                            createdAt,
+                            style: TextStyle(
+                              color: Colors.grey[500],
+                              fontSize: 12,
+                            ),
+                          )
 
-                      ],
-                    )
+                        ],
+                      )
 
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-            );
-          },
+              );
+            },
         );
 
       }),

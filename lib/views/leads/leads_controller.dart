@@ -25,6 +25,8 @@ class LeadsController extends GetxController {
         withAuth: true,
       );
 
+      print("response_lead $response");
+
       if(response["success"] == true) {
         leads.value = response["data"];
       }
