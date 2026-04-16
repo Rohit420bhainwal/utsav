@@ -67,7 +67,7 @@ class DashboardScreen extends StatelessWidget {
              // ),
              BottomNavigationBarItem(
                icon: Icon(Icons.message),
-               label: "Leads",
+               label: "My Inquiry",
              ),
              BottomNavigationBarItem(
                icon: Icon(Icons.settings),

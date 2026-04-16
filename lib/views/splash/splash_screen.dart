@@ -6,8 +6,8 @@ import '../../utils/app_colors.dart';
 class SplashScreen extends StatelessWidget {
   SplashScreen({super.key});
 
-  final SplashController controller = Get.put(SplashController());
-
+  //final SplashController controller = Get.put(SplashController());
+  final SplashController controller = Get.find();
   @override
   Widget build(BuildContext context) {
     return Scaffold(

@@ -18,23 +18,20 @@ class MessageController extends GetxController {
   var isSending = false.obs;
 
   late TextEditingController messageController;
-
   var selectedDate = Rxn<DateTime>();
+
   var guestCountController = TextEditingController();
   var budgetController = TextEditingController();
 
   @override
   void onInit() {
     super.onInit();
-    print("serviceId: $serviceId");
-    messageController = TextEditingController(
-      text: "Hi $vendorName,\n"
-          "I'm interested in booking your $serviceTitle "
-         /* "for my event on 10-12-2026. "*/
-          "Could you confirm availability and share more details along with a quotation?",
-    );
+
+    messageController = TextEditingController();
+    updateMessage();
   }
 
+  /// 📅 Pick Date
   Future<void> pickDate(BuildContext context) async {
     final picked = await showDatePicker(
       context: context,
@@ -45,36 +42,43 @@ class MessageController extends GetxController {
 
     if (picked != null) {
       selectedDate.value = picked;
-
-      // Update message dynamically
       updateMessage();
     }
   }
 
+  /// 🔄 Update Message Preview
   void updateMessage() {
     final date = selectedDate.value != null
-        ? "${selectedDate.value!.day}-${selectedDate.value!.month}-${selectedDate.value!.year}"
-        : "TBD";
+        ? "${selectedDate.value!.day}/${selectedDate.value!.month}/${selectedDate.value!.year}"
+        : "Not decided yet";
 
     final guests = guestCountController.text.isEmpty
-        ? "TBD"
+        ? "Not decided"
         : guestCountController.text;
 
     final budget = budgetController.text.isEmpty
-        ? "Not decided"
+        ? "Flexible"
         : budgetController.text;
 
     messageController.text =
-    "Hi $vendorName,\n"
-        "I'm interested in booking your $serviceTitle "
-        "for my event on $date.\n"
-        "Guest Count: $guests\n"
-        "Budget: $budget\n"
-        "Please share details and quotation.";
+    "Hi,\n\n"
+        "I’m interested in your *$serviceTitle* service.\n\n"
+        "📅 Event Date: $date\n"
+        "👥 Guests: $guests\n"
+        "💰 Budget: $budget\n\n"
+        "Please share availability and quotation.\n\n"
+        "Thanks!";
   }
 
+  /// 🚀 Send Lead
   Future<void> sendLead() async {
     try {
+      /// 🔴 BASIC VALIDATION
+      if (guestCountController.text.isEmpty) {
+        Get.snackbar("Required", "Please enter guest count");
+        return;
+      }
+
       isSending.value = true;
 
       final body = {
@@ -94,27 +98,7 @@ class MessageController extends GetxController {
       );
 
       if (response["success"] == true) {
-        Get.dialog(
-          AlertDialog(
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16),
-            ),
-            title: const Text("Success"),
-            content: const Text(
-              "Your query has been sent successfully.",
-            ),
-            actions: [
-              TextButton(
-                onPressed: () {
-                  Get.back(); // close dialog
-                  Get.back(); // close message screen
-                },
-                child: const Text("OK"),
-              ),
-            ],
-          ),
-          barrierDismissible: false,
-        );
+        _showSuccessBottomSheet();
       }
     } catch (e) {
       Get.snackbar(
@@ -126,5 +110,53 @@ class MessageController extends GetxController {
     } finally {
       isSending.value = false;
     }
+  }
+
+  /// ✅ SUCCESS UI (PREMIUM)
+  void _showSuccessBottomSheet() {
+    Get.bottomSheet(
+      Container(
+        padding: const EdgeInsets.all(20),
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+
+            const Icon(Icons.check_circle, color: Colors.green, size: 60),
+
+            const SizedBox(height: 12),
+
+            const Text(
+              "Inquiry Sent Successfully 🎉",
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+
+            const SizedBox(height: 8),
+
+            const Text(
+              "Our team will contact you shortly.",
+              textAlign: TextAlign.center,
+            ),
+
+            const SizedBox(height: 20),
+
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: () {
+                  Get.back(); // close sheet
+                  Get.back(); // close screen
+                },
+                child: const Text("Done"),
+              ),
+            ),
+          ],
+        ),
+      ),
+      isDismissible: false,
+    );
   }
 }

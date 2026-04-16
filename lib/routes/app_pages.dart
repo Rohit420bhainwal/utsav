@@ -8,6 +8,7 @@ import 'package:utsav/views/register/register_screen.dart';
 import 'package:utsav/views/splash/splash_screen.dart';
 
 
+import '../views/leads/lead_detail_screen.dart';
 import 'app_routes.dart';
 
 class AppPages {
@@ -39,6 +40,11 @@ class AppPages {
     GetPage(
         name: AppRoutes.profile,
         page: ()=>ProfileScreen()
+    ),
+
+    GetPage(
+      name: AppRoutes.leadDetails,
+      page: () => LeadDetailScreen(),
     ),
   ];
 }

@@ -19,7 +19,7 @@ class LeadDetailController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    leadId = Get.arguments;
+    leadId = Get.arguments?.toString() ?? "";
     fetchLeadDetails(leadId);
   }
 
@@ -96,4 +96,19 @@ class LeadDetailController extends GetxController {
     messageController.dispose();
     super.onClose();
   }
+
+  String formatDate(String? date) {
+    if (date == null || date.isEmpty) return "-";
+    try {
+      final dt = DateTime.parse(date);
+      return "${dt.day}/${dt.month}/${dt.year} ${dt.hour}:${dt.minute}";
+    } catch (e) {
+      return "-";
+    }
+  }
+
+  String getStatusText(String? status) {
+    return (status ?? "new").toUpperCase();
+  }
+
 }

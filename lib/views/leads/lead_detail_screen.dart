@@ -136,7 +136,7 @@ class LeadDetailScreen extends StatelessWidget {
               const SizedBox(height: 12),
 
               /// 🔥 MESSAGE
-              _buildCard(
+             /* _buildCard(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -156,12 +156,12 @@ class LeadDetailScreen extends StatelessWidget {
                     ),
                   ],
                 ),
-              ),
+              )*/
 
-              const SizedBox(height: 12),
+            /*  const SizedBox(height: 12),*/
 
               /// 🔥 STATUS
-              Container(
+            /*  Container(
                 padding:
                 const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
                 decoration: BoxDecoration(
@@ -174,6 +174,48 @@ class LeadDetailScreen extends StatelessWidget {
                     color: AppColors.secondary,
                     fontWeight: FontWeight.w600,
                   ),
+                ),
+              ),*/
+
+              /// 🔥 TRACKING SECTION (NEW MVP FEATURE)
+              _buildCard(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      "Inquiry Tracking",
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.textPrimary,
+                      ),
+                    ),
+
+                    const SizedBox(height: 12),
+
+                    _buildTrackRow(
+                      icon: Icons.calendar_today,
+                      title: "Created At",
+                      value: controller.formatDate(lead["createdAt"]),
+                    ),
+
+                    const SizedBox(height: 10),
+
+                    _buildTrackRow(
+                      icon: Icons.update,
+                      title: "Last Updated",
+                      value: controller.formatDate(lead["updatedAt"]),
+                    ),
+
+                    const SizedBox(height: 10),
+
+                    _buildTrackRow(
+                      icon: Icons.flag,
+                      title: "Current Status",
+                      value: (lead["status"] ?? "new").toUpperCase(),
+                      valueColor: _getStatusColor(lead["status"]),
+                    ),
+                  ],
                 ),
               ),
 
@@ -339,6 +381,37 @@ class LeadDetailScreen extends StatelessWidget {
     );
   }
 
+  Widget _buildTrackRow({
+    required IconData icon,
+    required String title,
+    required String value,
+    Color? valueColor,
+  }) {
+    return Row(
+      children: [
+        Icon(icon, size: 18, color: AppColors.primary),
+        const SizedBox(width: 10),
+
+        Expanded(
+          child: Text(
+            title,
+            style: TextStyle(
+              color: AppColors.textSecondary,
+            ),
+          ),
+        ),
+
+        Text(
+          value,
+          style: TextStyle(
+            color: valueColor ?? AppColors.textPrimary,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ],
+    );
+  }
+
   /// 🔥 ROW ITEM
   Widget _buildRow(IconData icon, String text) {
     return Row(
@@ -351,5 +424,20 @@ class LeadDetailScreen extends StatelessWidget {
         ),
       ],
     );
+  }
+
+  Color _getStatusColor(String? status) {
+    switch (status) {
+      case "new":
+        return Colors.blue;
+      case "contacted":
+        return Colors.orange;
+      case "converted":
+        return Colors.green;
+      case "closed":
+        return Colors.red;
+      default:
+        return Colors.grey;
+    }
   }
 }
