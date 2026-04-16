@@ -186,14 +186,61 @@ class ServiceDetailsScreen extends StatelessWidget {
                         ),
                         const SizedBox(height: 8),
 
-                        Row(
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Icon(Icons.star,
-                                color: Colors.green, size: 20),
-                            const SizedBox(width: 4),
-                            Text(
-                              "${service.rating.toStringAsFixed(1)} (${service.totalReviews} Reviews)",
+                            Row(
+                              children: [
+                                /// ⭐ STARS
+                                Row(
+                                  children: List.generate(5, (index) {
+                                    return Icon(
+                                      index < service.rating.round()
+                                          ? Icons.star
+                                          : Icons.star_border,
+                                      color: Colors.orange,
+                                      size: 20,
+                                    );
+                                  }),
+                                ),
+
+                                const SizedBox(width: 8),
+
+                                /// ⭐ AVG RATING
+                                Text(
+                                  service.rating > 0
+                                      ? service.rating.toStringAsFixed(1)
+                                      : "0.0",
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 14,
+                                  ),
+                                ),
+
+                                const SizedBox(width: 6),
+
+                                /// ⭐ TOTAL REVIEWS
+                                Text(
+                                  "(${service.totalReviews})",
+                                  style: TextStyle(
+                                    color: Colors.grey.shade600,
+                                    fontSize: 13,
+                                  ),
+                                ),
+                              ],
                             ),
+
+                            const SizedBox(height: 4),
+
+                            /// 🔥 EMPTY STATE
+                            if (service.totalReviews == 0)
+                              Text(
+                                "No reviews yet",
+                                style: TextStyle(
+                                  color: Colors.grey.shade500,
+                                  fontSize: 12,
+                                ),
+                              ),
                           ],
                         ),
 
@@ -254,7 +301,7 @@ class ServiceDetailsScreen extends StatelessWidget {
                     ),
                     child: Column(
                       crossAxisAlignment:
-                      CrossAxisAlignment.start,
+                      CrossAxisAlignment.stretch,
                       children: [
                         const Text(
                           "Description",

@@ -35,8 +35,8 @@ class ServiceModel {
       categoryName: json["categoryId"]?["name"] ?? "",
       vendorName: json["vendorId"]?["businessName"] ?? "",
       vendorId: json["vendorId"]?["_id"] ?? "",
-      rating: (json["vendorId"]?["rating"] ?? 0).toDouble(),
-      totalReviews: json["vendorId"]?["totalReviews"] ?? 0,
+      rating: (json["avgRating"] ?? 0).toDouble(),
+      totalReviews: json["totalReviews"] ?? 0,
       images: json["images"] != null
           ? List<String>.from(json["images"])
           : [],
