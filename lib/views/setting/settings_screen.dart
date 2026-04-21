@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:utsav/views/setting/settings_controller.dart';
 import '../../utils/app_colors.dart';
+import '../reportissue/report_issue_screen.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
@@ -25,7 +26,7 @@ class SettingsScreen extends StatelessWidget {
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-
+/*
           /// 🔔 Notifications Card
           _settingsCard(
             children: [
@@ -39,6 +40,7 @@ class SettingsScreen extends StatelessWidget {
               )),
             ],
           ),
+
 
           /// ⚙️ Preferences Card
           _settingsCard(
@@ -60,7 +62,7 @@ class SettingsScreen extends StatelessWidget {
               ),
             ],
           ),
-
+*/
           /// 🛡️ Legal Card
           _settingsCard(
             children: [
@@ -81,22 +83,84 @@ class SettingsScreen extends StatelessWidget {
           /// 💬 Support Card
           _settingsCard(
             children: [
-              _tile(
+             /* _tile(
                 icon: Icons.help_outline,
                 title: "Help Center",
-                onTap: () {},
+                  onTap: () {},
               ),
-              _divider(),
+              _divider(),*/
               _tile(
                 icon: Icons.support_agent_outlined,
-                title: "Contact Us",
-                onTap: () {},
+                title: "Help & Support",
+                onTap: () {
+                  Get.bottomSheet(
+                    Container(
+                      padding: const EdgeInsets.only(top: 12, left: 16, right: 16, bottom: 24), // Added bottom padding
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).scaffoldBackgroundColor,
+                        borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+                      ),
+                      child: SafeArea( // Ensures it doesn't overlap with system nav bar
+                        child: Wrap(
+                          children: [
+                            // ➖ Drag Handle
+                            Center(
+                              child: Container(
+                                width: 40,
+                                height: 4,
+                                margin: const EdgeInsets.only(bottom: 16),
+                                decoration: BoxDecoration(
+                                  color: Colors.grey.withOpacity(0.3),
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                              ),
+                            ),
+
+                            Text(
+                              "Reach Out to Us",
+                              style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+                            ),
+                            const SizedBox(height: 12, width: double.infinity),
+
+                            ListTile(
+                              leading: const Icon(Icons.call, color: Colors.green),
+                              title: const Text("Call Us"),
+                              onTap: () {
+                                Get.back();
+                                controller.contactCall();
+                              },
+                            ),
+                            ListTile(
+                              leading: const Icon(Icons.email, color: Colors.blue),
+                              title: const Text("Email Us"),
+                              onTap: () {
+                                Get.back();
+                                controller.contactEmail();
+                              },
+                            ),
+                            ListTile(
+                              leading: const Icon(Icons.chat, color: Colors.green),
+                              title: const Text("WhatsApp"),
+                              onTap: () {
+                                Get.back();
+                                controller.contactWhatsApp();
+                              },
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    isScrollControlled: true, // Allows the sheet to size itself better
+                  );
+                },
               ),
               _divider(),
               _tile(
                 icon: Icons.report_problem_outlined,
                 title: "Report Issue",
-                onTap: () {},
+                onTap: () {
+                  Get.to(() => ReportIssueScreen());
+                },
               ),
             ],
           ),

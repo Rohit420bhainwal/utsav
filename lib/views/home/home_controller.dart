@@ -5,6 +5,8 @@ import 'package:get/get.dart';
 import '../../model/service_model.dart';
 import '../../model/category_model.dart';
 import '../../services/api_service.dart';
+import '../../utils/api_exceptions.dart';
+
 
 class HomeController extends GetxController {
   final ApiService apiService = ApiService();
@@ -12,6 +14,9 @@ class HomeController extends GetxController {
   var isLoading = false.obs;
   var isCategoryLoading = false.obs;
   var isCityLoading = false.obs;
+
+  var isError = false.obs;
+  var errorMessage = "".obs;
 
   var selectedCategory = "All".obs;
   var selectedCity = "".obs;
@@ -26,7 +31,7 @@ class HomeController extends GetxController {
   void onInit() async {
     super.onInit();
 
-    await fetchCities(); // 🔥 FIRST LOAD CITY
+    await fetchCities();
     await detectUserCity();
     await fetchCategories();
     fetchServices();
@@ -44,7 +49,6 @@ class HomeController extends GetxController {
 
         cities.value = list.map((e) => e["name"].toString()).toList();
 
-        // 🔥 AUTO SELECT FIRST CITY
         if (cities.isNotEmpty) {
           selectedCity.value = cities.first;
         }
@@ -68,6 +72,8 @@ class HomeController extends GetxController {
             .map((e) => CategoryModel.fromJson(e))
             .toList();
       }
+    } catch (e) {
+      print("Category error: $e");
     } finally {
       isCategoryLoading.value = false;
     }
@@ -80,6 +86,7 @@ class HomeController extends GetxController {
   }) async {
     try {
       isLoading.value = true;
+      isError.value = false;
 
       Map<String, String> queryParams = {
         "city": selectedCity.value,
@@ -103,8 +110,12 @@ class HomeController extends GetxController {
             .map((e) => ServiceModel.fromJson(e))
             .toList();
       }
+    } on ApiException catch (e) {
+      isError.value = true;
+      errorMessage.value = e.message;
     } catch (e) {
-      print("Service error: $e");
+      isError.value = true;
+      errorMessage.value = "Something went wrong";
     } finally {
       isLoading.value = false;
     }
@@ -139,28 +150,17 @@ class HomeController extends GetxController {
   Future<void> detectUserCity() async {
     try {
       bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
-      if (!serviceEnabled) {
-        print("Location services are disabled");
-        return;
-      }
+      if (!serviceEnabled) return;
 
       LocationPermission permission = await Geolocator.checkPermission();
 
       if (permission == LocationPermission.denied) {
         permission = await Geolocator.requestPermission();
-
-        if (permission == LocationPermission.denied) {
-          print("Permission denied");
-          return;
-        }
+        if (permission == LocationPermission.denied) return;
       }
 
-      if (permission == LocationPermission.deniedForever) {
-        print("Permission permanently denied");
-        return;
-      }
+      if (permission == LocationPermission.deniedForever) return;
 
-      // ✅ SAFE to access location now
       Position position = await Geolocator.getCurrentPosition();
 
       List<Placemark> placemarks =
@@ -168,12 +168,10 @@ class HomeController extends GetxController {
           position.latitude, position.longitude);
 
       final city = placemarks.first.locality;
-      print("Detected city: $city");
 
       if (city != null && cities.contains(city)) {
         selectedCity.value = city;
       }
-
     } catch (e) {
       print("Location error: $e");
     }

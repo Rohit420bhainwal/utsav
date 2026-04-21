@@ -1,6 +1,7 @@
 import 'package:get/get.dart';
 import '../../model/service_model.dart';
 import '../../services/api_service.dart';
+import '../../utils/api_exceptions.dart';
 
 class ServiceDetailsController extends GetxController {
   final ApiService apiService = ApiService();
@@ -10,6 +11,9 @@ class ServiceDetailsController extends GetxController {
 
   final String serviceId;
 
+  var errorMessage = "".obs;
+  var isError = false.obs;
+
   ServiceDetailsController(this.serviceId);
 
   @override
@@ -18,19 +22,40 @@ class ServiceDetailsController extends GetxController {
     fetchService();
   }
 
+
+
   Future<void> fetchService() async {
     try {
       isLoading.value = true;
+      isError.value = false;
 
-      final response = await apiService.get("services/$serviceId",withAuth: false);
-      print("response_detail: $response");
+      final response = await apiService.get(
+        "services/$serviceId",
+        withAuth: false,
+      );
 
-      if (response["success"] == true) {
-        service.value =
-            ServiceModel.fromJson(response["data"]);
-      }
+      service.value = ServiceModel.fromJson(response["data"]);
+
+    } on NoInternetException catch (e) {
+      errorMessage.value = e.message;
+      isError.value = true;
+
+    } on TimeoutException catch (e) {
+      errorMessage.value = e.message;
+      isError.value = true;
+
+    } on UnauthorizedException catch (e) {
+      errorMessage.value = e.message;
+      isError.value = true;
+
+    } on ServerException catch (e) {
+      errorMessage.value = e.message;
+      isError.value = true;
+
     } catch (e) {
-      print("Details error: $e");
+      errorMessage.value = "Something went wrong";
+      isError.value = true;
+
     } finally {
       isLoading.value = false;
     }

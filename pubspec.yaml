@@ -50,6 +50,8 @@ dependencies:
   firebase_auth: ^5.3.0
   cloud_firestore: ^5.4.4
   flutter_local_notifications: ^17.1.0
+  intl: ^0.18.1
+  #webview_flutter: ^4.4.2
 
 dev_dependencies:
   flutter_test:

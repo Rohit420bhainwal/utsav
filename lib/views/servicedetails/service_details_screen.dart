@@ -5,6 +5,7 @@ import '../../utils/app_colors.dart';
 import '../../services/api_service.dart';
 import 'service_details_controller.dart';
 
+
 class ServiceDetailsScreen extends StatelessWidget {
   final String serviceId;
 
@@ -21,12 +22,55 @@ class ServiceDetailsScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: Colors.grey.shade100,
       body: Obx(() {
+        /// ================= LOADING =================
         if (controller.isLoading.value) {
           return const Center(child: CircularProgressIndicator());
         }
 
+        /// ================= ERROR UI =================
+        if (controller.isError.value) {
+          return Center(
+            child: Padding(
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.wifi_off,
+                    size: 70,
+                    color: Colors.grey.shade400,
+                  ),
+                  const SizedBox(height: 16),
+
+                  Text(
+                    controller.errorMessage.value,
+                    textAlign: TextAlign.center,
+                    style: textTheme.titleMedium?.copyWith(
+                      color: Colors.grey.shade700,
+                    ),
+                  ),
+
+                  const SizedBox(height: 20),
+
+                  ElevatedButton.icon(
+                    onPressed: controller.fetchService,
+                    icon: const Icon(Icons.refresh),
+                    label: const Text("Retry"),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.secondary,
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 24, vertical: 12),
+                    ),
+                  )
+                ],
+              ),
+            ),
+          );
+        }
+
         final service = controller.service.value;
 
+        /// ================= EMPTY =================
         if (service == null) {
           return const Center(child: Text("Service not found"));
         }
@@ -49,9 +93,11 @@ class ServiceDetailsScreen extends StatelessWidget {
                         width: double.infinity,
                         color: Colors.grey.shade200,
                         child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
+                          mainAxisAlignment:
+                          MainAxisAlignment.center,
                           children: const [
-                            Icon(Icons.image_outlined, size: 60, color: Colors.grey),
+                            Icon(Icons.image_outlined,
+                                size: 60, color: Colors.grey),
                             SizedBox(height: 8),
                             Text(
                               "No images available",
@@ -66,56 +112,70 @@ class ServiceDetailsScreen extends StatelessWidget {
                           itemCount: service.images.length,
                           itemBuilder: (context, index) {
                             final imageUrl =
-                            controller.apiService.getImageUrl(
+                            controller.apiService
+                                .getImageUrl(
                                 service.images[index]);
 
                             return GestureDetector(
                               onTap: () {
-                                Get.to(() => FullScreenImageViewer(
-                                  images: service.images,
-                                  initialIndex: index,
-                                ));
+                                Get.to(() =>
+                                    FullScreenImageViewer(
+                                      images: service.images,
+                                      initialIndex: index,
+                                    ));
                               },
                               child: Image.network(
                                 imageUrl,
                                 width: double.infinity,
                                 fit: BoxFit.cover,
 
-                                // ✅ FADE-IN EFFECT
-                                frameBuilder: (context, child, frame, wasSynchronouslyLoaded) {
-                                  if (wasSynchronouslyLoaded) return child;
+                                /// FADE
+                                frameBuilder: (context, child,
+                                    frame, wasSync) {
+                                  if (wasSync) return child;
                                   return AnimatedOpacity(
-                                    opacity: frame == null ? 0 : 1,
-                                    duration: const Duration(milliseconds: 400),
+                                    opacity:
+                                    frame == null ? 0 : 1,
+                                    duration:
+                                    const Duration(
+                                        milliseconds: 400),
                                     child: child,
                                   );
                                 },
 
-                                // ✅ LOADING UI
-                                loadingBuilder: (context, child, loadingProgress) {
-                                  if (loadingProgress == null) return child;
+                                /// LOADING
+                                loadingBuilder:
+                                    (context, child, progress) {
+                                  if (progress == null)
+                                    return child;
 
                                   return Container(
                                     height: 280,
-                                    width: double.infinity,
-                                    color: Colors.grey.shade200,
+                                    color:
+                                    Colors.grey.shade200,
                                     child: Column(
-                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      mainAxisAlignment:
+                                      MainAxisAlignment
+                                          .center,
                                       children: [
                                         SizedBox(
                                           height: 28,
                                           width: 28,
-                                          child: CircularProgressIndicator(
+                                          child:
+                                          CircularProgressIndicator(
                                             strokeWidth: 2,
-                                            color: AppColors.secondary,
+                                            color: AppColors
+                                                .secondary,
                                           ),
                                         ),
-                                        const SizedBox(height: 10),
+                                        const SizedBox(
+                                            height: 10),
                                         Text(
                                           "Loading image...",
                                           style: TextStyle(
                                             fontSize: 12,
-                                            color: Colors.grey.shade600,
+                                            color: Colors
+                                                .grey.shade600,
                                           ),
                                         )
                                       ],
@@ -123,21 +183,28 @@ class ServiceDetailsScreen extends StatelessWidget {
                                   );
                                 },
 
-                                // ✅ ERROR UI
-                                errorBuilder: (context, error, stackTrace) {
+                                /// ERROR IMAGE
+                                errorBuilder:
+                                    (context, error, stack) {
                                   return Container(
                                     height: 280,
-                                    width: double.infinity,
-                                    color: Colors.grey.shade200,
+                                    color:
+                                    Colors.grey.shade200,
                                     child: Column(
-                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      mainAxisAlignment:
+                                      MainAxisAlignment
+                                          .center,
                                       children: const [
-                                        Icon(Icons.broken_image_outlined,
-                                            size: 50, color: Colors.grey),
+                                        Icon(
+                                            Icons
+                                                .broken_image_outlined,
+                                            size: 50,
+                                            color: Colors.grey),
                                         SizedBox(height: 10),
                                         Text(
                                           "Failed to load image",
-                                          style: TextStyle(color: Colors.grey),
+                                          style: TextStyle(
+                                              color: Colors.grey),
                                         )
                                       ],
                                     ),
@@ -149,7 +216,7 @@ class ServiceDetailsScreen extends StatelessWidget {
                         ),
                       ),
 
-                      /// 🔙 BACK BUTTON
+                      /// BACK
                       Positioned(
                         top: 40,
                         left: 16,
@@ -167,80 +234,62 @@ class ServiceDetailsScreen extends StatelessWidget {
 
                   const SizedBox(height: 16),
 
-                  /// 🔹 TITLE CARD
+                  /// 🔹 TITLE
                   Container(
-                    margin: const EdgeInsets.symmetric(horizontal: 16),
+                    margin: const EdgeInsets.symmetric(
+                        horizontal: 16),
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
                       color: Colors.white,
-                      borderRadius: BorderRadius.circular(16),
+                      borderRadius:
+                      BorderRadius.circular(16),
                     ),
                     child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                      crossAxisAlignment:
+                      CrossAxisAlignment.start,
                       children: [
                         Text(
                           service.title,
-                          style: textTheme.titleLarge?.copyWith(
+                          style:
+                          textTheme.labelMedium?.copyWith(
                             fontWeight: FontWeight.bold,
                           ),
                         ),
                         const SizedBox(height: 8),
 
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                        Row(
                           children: [
                             Row(
-                              children: [
-                                /// ⭐ STARS
-                                Row(
-                                  children: List.generate(5, (index) {
-                                    return Icon(
-                                      index < service.rating.round()
-                                          ? Icons.star
-                                          : Icons.star_border,
-                                      color: Colors.orange,
-                                      size: 20,
-                                    );
-                                  }),
-                                ),
-
-                                const SizedBox(width: 8),
-
-                                /// ⭐ AVG RATING
-                                Text(
-                                  service.rating > 0
-                                      ? service.rating.toStringAsFixed(1)
-                                      : "0.0",
-                                  style: const TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 14,
-                                  ),
-                                ),
-
-                                const SizedBox(width: 6),
-
-                                /// ⭐ TOTAL REVIEWS
-                                Text(
-                                  "(${service.totalReviews})",
-                                  style: TextStyle(
-                                    color: Colors.grey.shade600,
-                                    fontSize: 13,
-                                  ),
-                                ),
-                              ],
+                              children:
+                              List.generate(5, (index) {
+                                return Icon(
+                                  index <
+                                      service.rating
+                                          .round()
+                                      ? Icons.star
+                                      : Icons.star_border,
+                                  color: Colors.orange,
+                                  size: 20,
+                                );
+                              }),
                             ),
-
-                            const SizedBox(height: 4),
-
-                            /// 🔥 EMPTY STATE
-                            if (service.totalReviews == 0)
-                              Text(
-                                "No reviews yet",
-                                style: TextStyle(
-                                  color: Colors.grey.shade500,
-                                  fontSize: 12,
-                                ),
+                            const SizedBox(width: 8),
+                            Text(
+                              service.rating > 0
+                                  ? service.rating
+                                  .toStringAsFixed(1)
+                                  : "0.0",
+                              style: const TextStyle(
+                                  fontWeight:
+                                  FontWeight.bold),
+                            ),
+                            const SizedBox(width: 6),
+                            Text(
+                              "(${service.totalReviews})",
+                              style: TextStyle(
+                                color: Colors.grey.shade600,
                               ),
+                            ),
                           ],
                         ),
 
@@ -248,10 +297,13 @@ class ServiceDetailsScreen extends StatelessWidget {
 
                         Row(
                           children: [
-                            const Icon(Icons.location_on,
-                                size: 18, color: Colors.grey),
+                             Icon(Icons.location_on,
+                                size: 18,
+                                color: AppColors.green),
                             const SizedBox(width: 4),
-                            Text(service.city),
+                            Text(service.city,
+                              style: textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w900),
+                            ),
                           ],
                         ),
                       ],
@@ -262,11 +314,13 @@ class ServiceDetailsScreen extends StatelessWidget {
 
                   /// 🔹 PRICE
                   Container(
-                    margin: const EdgeInsets.symmetric(horizontal: 16),
+                    margin: const EdgeInsets.symmetric(
+                        horizontal: 16),
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
                       color: Colors.white,
-                      borderRadius: BorderRadius.circular(16),
+                      borderRadius:
+                      BorderRadius.circular(16),
                     ),
                     child: Row(
                       mainAxisAlignment:
@@ -274,16 +328,19 @@ class ServiceDetailsScreen extends StatelessWidget {
                       children: [
                         Text(
                           "₹${service.price.toStringAsFixed(0)}",
-                          style: const TextStyle(
+                          style: textTheme.labelMedium?.copyWith(color: AppColors.secondary,fontWeight: FontWeight.bold),
+                          /*style: const TextStyle(
                             color: AppColors.secondary,
                             fontSize: 20,
                             fontWeight: FontWeight.bold,
-                          ),
+                          ),*/
                         ),
                         Chip(
-                          label: Text(service.categoryName),
-                          backgroundColor:
-                          AppColors.secondary.withOpacity(0.1),
+                          label:
+                          Text(service.categoryName),
+                          backgroundColor: AppColors
+                              .secondary
+                              .withOpacity(0.1),
                         )
                       ],
                     ),
@@ -293,25 +350,26 @@ class ServiceDetailsScreen extends StatelessWidget {
 
                   /// 🔹 DESCRIPTION
                   Container(
-                    margin: const EdgeInsets.symmetric(horizontal: 16),
+                    margin: const EdgeInsets.symmetric(
+                        horizontal: 16),
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
                       color: Colors.white,
-                      borderRadius: BorderRadius.circular(16),
+                      borderRadius:
+                      BorderRadius.circular(16),
                     ),
                     child: Column(
                       crossAxisAlignment:
                       CrossAxisAlignment.stretch,
                       children: [
-                        const Text(
+                         Text(
                           "Description",
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 16,
-                          ),
+                          style: textTheme.titleSmall?.copyWith(color: AppColors.textSecondary),
                         ),
-                        const SizedBox(height: 8),
-                        Text(service.description),
+                        SizedBox(height: 8),
+                        Text(service.description,
+                          style: textTheme.bodyMedium?.copyWith(color:AppColors.textPrimary ),
+                        ),
                       ],
                     ),
                   ),
@@ -333,22 +391,22 @@ class ServiceDetailsScreen extends StatelessWidget {
                   width: double.infinity,
                   child: ElevatedButton(
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.secondary,
-                      padding: const EdgeInsets.symmetric(
+                      backgroundColor:
+                      AppColors.secondary,
+                      padding:
+                      const EdgeInsets.symmetric(
                           vertical: 16),
-                      shape: RoundedRectangleBorder(
-                        borderRadius:
-                        BorderRadius.circular(12),
-                      ),
                     ),
                     onPressed: () async {
                       final result =
-                      await Get.to(() => MessageScreen(
-                        serviceId: service.id,
-                        serviceTitle: service.title,
-                        vendorName:
-                        service.vendorName,
-                      ));
+                      await Get.to(() =>
+                          MessageScreen(
+                            serviceId: service.id,
+                            serviceTitle:
+                            service.title,
+                            vendorName:
+                            service.vendorName,
+                          ));
 
                       if (result == true) {
                         Get.snackbar(
@@ -361,10 +419,8 @@ class ServiceDetailsScreen extends StatelessWidget {
                     },
                     child: const Text(
                       "Message",
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 16,
-                      ),
+                      style:
+                      TextStyle(color: Colors.white),
                     ),
                   ),
                 ),

@@ -17,6 +17,7 @@ class MessageScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
     final controller = Get.put(
       MessageController(
         serviceId: serviceId,
@@ -29,8 +30,14 @@ class MessageScreen extends StatelessWidget {
       backgroundColor: Colors.grey.shade100,
 
       appBar: AppBar(
-        title: Text(vendorName),
-        backgroundColor: Colors.black,
+        title: Text(vendorName,
+          style: textTheme.titleLarge?.copyWith(
+            color: AppColors.surface,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        centerTitle: true,
+     //   backgroundColor: AppColors.primary,
         elevation: 1,
       ),
 

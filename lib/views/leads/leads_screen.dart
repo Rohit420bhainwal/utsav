@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:utsav/views/leads/lead_detail_screen.dart';
 import '../../utils/app_colors.dart';
+import '../../utils/date_utils.dart';
 import 'leads_controller.dart';
 
 class LeadsScreen extends StatelessWidget {
@@ -56,9 +57,8 @@ class LeadsScreen extends StatelessWidget {
             final city = service["city"] ?? "";
 
             final eventDateRaw = event["eventDate"];
-            final eventDate = eventDateRaw != null
-                ? eventDateRaw.toString().substring(0, 10)
-                : "-";
+            final eventDate = DateUtilsHelper.formatDate(eventDateRaw);
+
 
             final guestCount = event["guestCount"]?.toString() ?? "0";
             final budget = event["budget"]?.toString() ?? "-";
@@ -68,9 +68,8 @@ class LeadsScreen extends StatelessWidget {
             (lead["status"] ?? "new").toString().toUpperCase();
 
             final createdAtRaw = lead["createdAt"];
-            final createdAt = createdAtRaw != null
-                ? createdAtRaw.toString().substring(0, 10)
-                : "-";
+            final createdAt = DateUtilsHelper.formatDate(createdAtRaw);
+
 
             return GestureDetector(
               onTap: () {
@@ -97,19 +96,32 @@ class LeadsScreen extends StatelessWidget {
                   children: [
 
                     /// 🔥 VENDOR NAME (UPDATED UI)
-                    Text(
-                      vendorName,
-                      style: textTheme.titleSmall,
-                    ),
+                    Row(
+                        children: [
+                          const Icon(Icons.account_circle, size: 18),
+                          const SizedBox(width: 6),
+                          Text(
+                            vendorName,
+                            style: textTheme.titleSmall,
+                          ),
+                        ]
 
-                    /// 🔥 BUSINESS NAME
-                    if (businessName.isNotEmpty)
-                      Text(
-                        businessName,
-                        style: textTheme.bodyMedium?.copyWith(
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
+                    ),
+                    Row(
+                        children: [
+                          const Icon(Icons.business, size: 18),
+                          const SizedBox(width: 6),
+                          /// 🔥 BUSINESS NAME
+                          if (businessName.isNotEmpty)
+                            Text(
+                              businessName,
+                              style: textTheme.bodyMedium?.copyWith(
+                                  fontWeight: FontWeight.w900,color: AppColors.secondary
+                              ),
+                            )
+                        ]
+
+                    ),
 
                     const SizedBox(height: 6),
 
@@ -153,13 +165,16 @@ class LeadsScreen extends StatelessWidget {
                       children: [
                         const Icon(Icons.currency_rupee, size: 18),
                         const SizedBox(width: 6),
-                        Text("₹ $budget"),
+                        Text(
+                          controller.formatBudget(budget),
+                          style: const TextStyle(fontWeight: FontWeight.w500),
+                        ),
                       ],
                     ),
 
                     const SizedBox(height: 12),
 
-                    /// MESSAGE
+                    /*/// MESSAGE
                     Text(
                       message,
                       maxLines: 2,
@@ -169,7 +184,7 @@ class LeadsScreen extends StatelessWidget {
                       ),
                     ),
 
-                    const SizedBox(height: 12),
+                    const SizedBox(height: 12),*/
 
                     /// STATUS + DATE
                     Row(

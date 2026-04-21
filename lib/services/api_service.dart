@@ -6,6 +6,8 @@ import 'package:utsav/services/secure_storage_service.dart';
 import 'package:http_parser/http_parser.dart';
 import 'package:mime/mime.dart';
 
+import '../utils/api_exceptions.dart';
+
 
 class ApiService {
   static const String baseUrl = "http://192.168.50.50:5000/api/v1";
@@ -47,10 +49,22 @@ class ApiService {
         bool withAuth = false,
         Map<String, String>? queryParams,
       }) async {
-    final uri = Uri.parse("$baseUrl/$endpoint").replace(queryParameters: queryParams);
-    final response = await http.get(uri, headers: await getHeaders(withAuth: withAuth));
+    try {
+      final uri = Uri.parse("$baseUrl/$endpoint")
+          .replace(queryParameters: queryParams);
 
-    return _processResponse(response);
+      final response = await http
+          .get(uri, headers: await getHeaders(withAuth: withAuth))
+          .timeout(const Duration(seconds: 15));
+
+      return _processResponse(response);
+    } on SocketException {
+      throw NoInternetException();
+    } on TimeoutException {
+      throw TimeoutException();
+    } catch (e) {
+      throw ApiException("Unexpected error occurred");
+    }
   }
 
   Future<Map<String, dynamic>> put(String endpoint, Map<String, dynamic> body,
@@ -69,22 +83,31 @@ class ApiService {
   }
 
   Map<String, dynamic> _processResponse(http.Response response) {
-    // print("response.statusCode: ${response.statusCode}");
-    // print("response.body: ${response.body}");
-
     if (response.body.isEmpty) {
-      throw Exception("Empty response from server");
+      throw ServerException("Empty response from server");
     }
 
     final decodedBody = jsonDecode(response.body);
 
-    if (response.statusCode >= 200 && response.statusCode < 300) {
-      return decodedBody;
-    } else {
-      // ❌ Error from backend (still return backend response)
-      throw Exception(
-        decodedBody["message"] ?? "Something went wrong",
-      );
+    switch (response.statusCode) {
+      case 200:
+      case 201:
+        return decodedBody;
+
+      case 400:
+        throw ServerException(decodedBody["message"] ?? "Bad request");
+
+      case 401:
+        throw UnauthorizedException();
+
+      case 404:
+        throw ServerException("Resource not found");
+
+      case 500:
+        throw ServerException("Internal server error");
+
+      default:
+        throw ServerException("Something went wrong");
     }
   }
 

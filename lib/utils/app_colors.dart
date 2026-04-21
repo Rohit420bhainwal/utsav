@@ -15,10 +15,12 @@ class AppColors {
 
   // ✍️ Text (NO BLACK)
   static const textPrimary = Color(0xFF424242);
-  static const textSecondary = Color(0xFF9E9E9E);
+  static const textSecondary = Color(0xFF969595);
 
   // ❗ Errors
   static const error = Color(0xFFD32F2F);
+
+  static const green = Color(0xFF16911A);
 }
 
 

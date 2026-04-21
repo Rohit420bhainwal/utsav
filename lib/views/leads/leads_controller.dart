@@ -38,4 +38,18 @@ class LeadsController extends GetxController {
     }
 
   }
+
+  String formatBudget(dynamic budget) {
+    if (budget == null) return "₹ --";
+
+    try {
+      final value = double.parse(budget.toString());
+
+      if (value <= 0) return "₹ --";
+
+      return "₹ ${value.toStringAsFixed(0)}";
+    } catch (e) {
+      return "₹ --";
+    }
+  }
 }

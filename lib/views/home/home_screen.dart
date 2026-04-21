@@ -60,7 +60,8 @@ class HomeScreen extends StatelessWidget {
               },
               child: CircleAvatar(
                 radius: 18,
-                backgroundColor: AppColors.secondary.withOpacity(0.1),
+                backgroundColor:
+                AppColors.secondary.withOpacity(0.1),
                 child: Icon(
                   Icons.person,
                   color: AppColors.secondary,
@@ -71,126 +72,130 @@ class HomeScreen extends StatelessWidget {
         ],
       ),
 
-      body: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-
-            const SizedBox(height: 16),
-
-            // ================= SEARCH BAR =================
-           /* Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: TextField(
-                controller: controller.searchController,
-                onChanged: controller.onSearch,
-                decoration: InputDecoration(
-                  hintText: "Search services...",
-                  prefixIcon: const Icon(Icons.search),
-                  filled: true,
-                  fillColor: Colors.white,
-                  contentPadding:
-                  const EdgeInsets.symmetric(vertical: 0),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide.none,
-                  ),
+      // ================= BODY =================
+      body: Obx(() {
+        /// 🔴 ERROR STATE
+        if (controller.isError.value) {
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.wifi_off,
+                    size: 70, color: Colors.grey.shade400),
+                const SizedBox(height: 16),
+                Text(
+                  controller.errorMessage.value,
+                  textAlign: TextAlign.center,
                 ),
-              ),
+                const SizedBox(height: 20),
+                ElevatedButton(
+                  onPressed: () => controller.fetchServices(),
+                  child: const Text("Retry"),
+                )
+              ],
             ),
+          );
+        }
 
-            const SizedBox(height: 20),*/
+        return SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
 
-            // ================= CATEGORY TITLE =================
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Text(
-                "Explore Categories",
-                style: textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
+              const SizedBox(height: 16),
 
-            const SizedBox(height: 12),
-
-            // ================= CATEGORY CHIPS =================
-            Obx(() {
-              if (controller.isCategoryLoading.value) {
-                return const Center(
-                  child: Padding(
-                    padding: EdgeInsets.all(20),
-                    child: CircularProgressIndicator(),
-                  ),
-                );
-              }
-
-              return SizedBox(
-                height: 45,
-                child: ListView(
-                  scrollDirection: Axis.horizontal,
-                  padding:
-                  const EdgeInsets.symmetric(horizontal: 16),
-                  children: [
-                    _buildCategoryChip("All"),
-                    ...controller.categories
-                        .map((cat) =>
-                        _buildCategoryChip(cat.name))
-                        .toList(),
-                  ],
-                ),
-              );
-            }),
-
-            const SizedBox(height: 20),
-
-            // ================= SERVICES GRID =================
-            Obx(() {
-              if (controller.isLoading.value) {
-                return const Padding(
-                  padding: EdgeInsets.only(top: 50),
-                  child: Center(
-                    child: CircularProgressIndicator(),
-                  ),
-                );
-              }
-
-              if (controller.services.isEmpty) {
-                return const Padding(
-                  padding: EdgeInsets.only(top: 50),
-                  child: Center(
-                    child: Text("No services found"),
-                  ),
-                );
-              }
-
-              return GridView.builder(
-                shrinkWrap: true,
-                physics:
-                const NeverScrollableScrollPhysics(),
+              /// ================= CATEGORY TITLE =================
+              Padding(
                 padding:
                 const EdgeInsets.symmetric(horizontal: 16),
-                itemCount: controller.services.length,
-                gridDelegate:
-                const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  mainAxisSpacing: 16,
-                  crossAxisSpacing: 16,
-                  childAspectRatio: 0.75,
+                child: Text(
+                  "Explore Categories",
+                  style: textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
+              ),
+
+              const SizedBox(height: 12),
+
+              /// ================= CATEGORY LIST =================
+              Obx(() {
+                if (controller.isCategoryLoading.value) {
+                  return const Center(
+                    child: Padding(
+                      padding: EdgeInsets.all(20),
+                      child: CircularProgressIndicator(),
+                    ),
+                  );
+                }
+
+                return SizedBox(
+                  height: 45,
+                  child: ListView(
+                    scrollDirection: Axis.horizontal,
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 16),
+                    children: [
+                      _buildCategoryChip("All"),
+                      ...controller.categories
+                          .map((cat) =>
+                          _buildCategoryChip(cat.name))
+                          .toList(),
+                    ],
+                  ),
+                );
+              }),
+
+              const SizedBox(height: 20),
+
+              /// ================= SERVICES =================
+              Obx(() {
+                if (controller.isLoading.value) {
+                  return const Padding(
+                    padding: EdgeInsets.only(top: 50),
+                    child: Center(
+                        child: CircularProgressIndicator()),
+                  );
+                }
+
+                if (controller.services.isEmpty) {
+                  return const Padding(
+                    padding: EdgeInsets.only(top: 50),
+                    child: Center(
+                        child: Text("No services found")),
+                  );
+                }
+
+                return GridView.builder(
+                  shrinkWrap: true,
+                  physics:
+                  const NeverScrollableScrollPhysics(),
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 16),
+                  itemCount: controller.services.length,
+                  gridDelegate:
+                  const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    mainAxisSpacing: 16,
+                    crossAxisSpacing: 16,
+                    childAspectRatio: 0.75,
+                  ),
                   itemBuilder: (context, index) {
-                    final service = controller.services[index];
+                    final service =
+                    controller.services[index];
 
                     return GestureDetector(
                       onTap: () {
-                        Get.to(() => ServiceDetailsScreen(
-                          serviceId: service.id, // make sure model has id
-                        ));
+                        Get.to(() =>
+                            ServiceDetailsScreen(
+                              serviceId: service.id,
+                            ));
                       },
                       child: Container(
                         decoration: BoxDecoration(
                           color: Colors.white,
-                          borderRadius: BorderRadius.circular(16),
+                          borderRadius:
+                          BorderRadius.circular(16),
                           boxShadow: [
                             BoxShadow(
                               color: Colors.grey.shade200,
@@ -199,116 +204,131 @@ class HomeScreen extends StatelessWidget {
                           ],
                         ),
                         child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                          crossAxisAlignment:
+                          CrossAxisAlignment.start,
                           children: [
+
+                            /// ================= SAFE IMAGE =================
                             ClipRRect(
-                              borderRadius: const BorderRadius.vertical(
+                              borderRadius:
+                              const BorderRadius.vertical(
                                 top: Radius.circular(16),
                               ),
                               child: service.images.isNotEmpty
                                   ? Image.network(
-                                controller.apiService.getImageUrl(service.images[0]),
+                                controller.apiService
+                                    .getImageUrl(
+                                    service.images[0]),
                                 height: 110,
                                 width: double.infinity,
                                 fit: BoxFit.cover,
 
-                                // ✅ LOADING (Better UI)
-                                loadingBuilder: (context, child, loadingProgress) {
-                                  if (loadingProgress == null) return child;
+                                loadingBuilder:
+                                    (context, child,
+                                    progress) {
+                                  if (progress ==
+                                      null) return child;
 
                                   return Container(
                                     height: 110,
-                                    width: double.infinity,
-                                    decoration: BoxDecoration(
-                                      color: Colors.grey.shade200,
-                                    ),
-                                    child: Column(
-                                      mainAxisAlignment: MainAxisAlignment.center,
-                                      children: [
-                                        SizedBox(
-                                          height: 22,
-                                          width: 22,
-                                          child: CircularProgressIndicator(
-                                            strokeWidth: 2,
-                                            color: AppColors.secondary,
-                                          ),
-                                        ),
-                                        const SizedBox(height: 6),
-                                        Text(
-                                          "Loading...",
-                                          style: TextStyle(
-                                            fontSize: 11,
-                                            color: Colors.grey.shade600,
-                                          ),
-                                        )
-                                      ],
+                                    color: Colors
+                                        .grey.shade200,
+                                    child:
+                                    const Center(
+                                      child:
+                                      CircularProgressIndicator(
+                                          strokeWidth:
+                                          2),
                                     ),
                                   );
                                 },
 
-                                // ✅ ERROR UI (Clean)
-                                errorBuilder: (context, error, stackTrace) {
-                                  return Container(
-                                    height: 110,
-                                    width: double.infinity,
-                                    decoration: BoxDecoration(
-                                      color: Colors.grey.shade200,
-                                    ),
-                                    child: Column(
-                                      mainAxisAlignment: MainAxisAlignment.center,
-                                      children: const [
-                                        Icon(Icons.broken_image_outlined,
-                                            size: 30, color: Colors.grey),
-                                        SizedBox(height: 6),
-                                        Text(
-                                          "Image not available",
-                                          style: TextStyle(fontSize: 11, color: Colors.grey),
-                                        )
-                                      ],
-                                    ),
-                                  );
+                                errorBuilder: (context,
+                                    error, stack) {
+                                  return _noImage();
                                 },
                               )
-                                  : Container(
-                                height: 110,
-                                width: double.infinity,
-                                decoration: BoxDecoration(
-                                  color: Colors.grey.shade200,
-                                ),
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: const [
-                                    Icon(Icons.image_outlined,
-                                        size: 30, color: Colors.grey),
-                                    SizedBox(height: 6),
-                                    Text(
-                                      "No Image",
-                                      style: TextStyle(fontSize: 11, color: Colors.grey),
-                                    )
-                                  ],
-                                ),
-                              ),
+                                  : _noImage(),
                             ),
+
+                            /// ================= TEXT =================
                             Padding(
-                              padding: const EdgeInsets.all(10),
+                              padding:
+                              const EdgeInsets.all(10),
                               child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
+                                crossAxisAlignment:
+                                CrossAxisAlignment
+                                    .start,
                                 children: [
                                   Text(
                                     service.title,
                                     maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: textTheme.titleMedium?.copyWith(
-                                      fontWeight: FontWeight.bold,
+                                    overflow:
+                                    TextOverflow
+                                        .ellipsis,
+                                    style: textTheme
+                                        .titleMedium
+                                        ?.copyWith(
+                                      fontWeight:
+                                      FontWeight.bold,
                                     ),
                                   ),
                                   const SizedBox(height: 6),
                                   Text(
                                     "₹${service.price.toStringAsFixed(0)}",
                                     style: const TextStyle(
-                                      color: AppColors.secondary,
-                                      fontWeight: FontWeight.bold,
+                                      color: AppColors
+                                          .secondary,
+                                      fontWeight:
+                                      FontWeight.bold,
                                     ),
+                                  ),
+                                  Text(
+                                    service.categoryName,
+                                    maxLines: 1,
+                                    overflow:
+                                    TextOverflow
+                                        .ellipsis,
+                                    style: textTheme
+                                        .titleSmall
+                                        ?.copyWith(color: AppColors.textPrimary),
+                                  ),
+                                  Row(
+                                    children: [
+                                      Row(
+                                        children:
+                                        List.generate(5, (index) {
+                                          return Icon(
+                                            index <
+                                                service.rating
+                                                    .round()
+                                                ? Icons.star
+                                                : Icons.star_border,
+                                            color: Colors.orange,
+                                            size: 10,
+                                          );
+                                        }),
+                                      ),
+                                      const SizedBox(width: 8),
+                                      Text(
+                                        service.rating > 0
+                                            ? service.rating
+                                            .toStringAsFixed(1)
+                                            : "0.0",
+                                        style: textTheme.bodySmall?.copyWith(color: AppColors.primary),
+                                        // style: const TextStyle(
+                                        //     fontWeight:
+                                        //     FontWeight.bold),
+                                      ),
+
+                                      Text(
+                                        "(${service.totalReviews})",
+                                        style: textTheme.bodySmall?.copyWith(color: AppColors.primary),
+                                        /*style: TextStyle(
+                                          color: Colors.grey.shade600,
+                                        ),*/
+                                      ),
+                                    ],
                                   ),
                                 ],
                               ),
@@ -317,17 +337,19 @@ class HomeScreen extends StatelessWidget {
                         ),
                       ),
                     );
-                  }
-              );
-            }),
+                  },
+                );
+              }),
 
-            const SizedBox(height: 30),
-          ],
-        ),
-      ),
+              const SizedBox(height: 30),
+            ],
+          ),
+        );
+      }),
     );
   }
 
+  /// ================= CATEGORY CHIP =================
   Widget _buildCategoryChip(String name) {
     return Obx(() {
       final isSelected =
@@ -364,5 +386,26 @@ class HomeScreen extends StatelessWidget {
         ),
       );
     });
+  }
+
+  /// ================= NO IMAGE WIDGET =================
+  Widget _noImage() {
+    return Container(
+      height: 110,
+      width: double.infinity,
+      color: Colors.grey.shade200,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: const [
+          Icon(Icons.image_outlined,
+              size: 30, color: Colors.grey),
+          SizedBox(height: 6),
+          Text(
+            "No Image",
+            style: TextStyle(fontSize: 11, color: Colors.grey),
+          )
+        ],
+      ),
+    );
   }
 }
