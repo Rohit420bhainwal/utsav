@@ -159,10 +159,11 @@ class HomeScreen extends StatelessWidget {
                 }
 
                 if (controller.services.isEmpty) {
-                  return const Padding(
-                    padding: EdgeInsets.only(top: 50),
+                  return Padding(
+                    padding: const EdgeInsets.only(top: 50),
                     child: Center(
-                        child: Text("No services found")),
+                      child: Text(controller.errorMessage.value),
+                    ),
                   );
                 }
 

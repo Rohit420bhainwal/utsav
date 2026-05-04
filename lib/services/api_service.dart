@@ -10,9 +10,13 @@ import '../utils/api_exceptions.dart';
 
 
 class ApiService {
+/*  static const String baseUrl = "https://utbackend-api.onrender.com/api/v1";
+  static const String imageBaseUrl = "https://utbackend-api.onrender.com";*/
+
   static const String baseUrl = "http://192.168.50.50:5000/api/v1";
   /// 🔥 ADD THIS
   static const String imageBaseUrl = "http://192.168.50.50:5000";
+
   //final Dio _dio = Dio(BaseOptions(baseUrl: 'https://192.168.222.102:5000/api/v1/auth/'));
 
   final box = GetStorage();

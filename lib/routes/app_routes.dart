@@ -7,4 +7,5 @@ class AppRoutes {
   static const editProfile = '/edit_profile';
   static const profile = '/profile';
   static const leadDetails = '/lead_details';
+  static const verifyOtp = '/verify-otp';
 }

@@ -9,6 +9,7 @@ import 'package:utsav/views/splash/splash_screen.dart';
 
 
 import '../views/leads/lead_detail_screen.dart';
+import '../views/verifyotp/verify_otp_screen.dart';
 import 'app_routes.dart';
 
 class AppPages {
@@ -45,6 +46,11 @@ class AppPages {
     GetPage(
       name: AppRoutes.leadDetails,
       page: () => LeadDetailScreen(),
+    ),
+
+    GetPage(
+      name: AppRoutes.verifyOtp,
+      page: () => VerifyOtpScreen(),
     ),
   ];
 }

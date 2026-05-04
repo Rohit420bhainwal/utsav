@@ -1,8 +1,13 @@
 import 'package:get/get.dart';
 
+import '../../services/api_service.dart';
+import '../../routes/app_routes.dart';
+
 class RegisterController extends GetxController {
   final isLoading = false.obs;
   final isPasswordVisible = false.obs;
+
+  final ApiService _apiService = ApiService();
 
   void togglePasswordVisibility() {
     isPasswordVisible.value = !isPasswordVisible.value;
@@ -25,11 +30,32 @@ class RegisterController extends GetxController {
     try {
       isLoading.value = true;
 
-      // TODO: Replace with real API call
-      await Future.delayed(const Duration(seconds: 2));
+      final response = await _apiService.post(
+        "auth/register",
+        {
+          "name": name,
+          "phone": mobile,
+          "email": email,
+          "password": password,
+          "role": "customer"
+        },
+        withAuth: false,
+      );
 
-      Get.snackbar('Success', 'Registration successful');
-      // Get.offAllNamed('/login');
+      if (response["success"] == true) {
+        Get.snackbar("OTP Sent", "Check your email for OTP");
+
+        /// ✅ GO TO VERIFY OTP SCREEN
+        Get.toNamed(
+          AppRoutes.verifyOtp,
+          arguments: {
+            "email": email,
+            "fromRegister": true, // 🔥 IMPORTANT FLAG
+          },
+        );
+      } else {
+        Get.snackbar("Error", response["message"]);
+      }
     } catch (e) {
       Get.snackbar('Error', 'Registration failed');
     } finally {

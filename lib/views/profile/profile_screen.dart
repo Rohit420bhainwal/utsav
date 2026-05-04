@@ -73,6 +73,8 @@ class ProfileScreen extends StatelessWidget {
 
         final avatar = data["avatar"];
 
+        print("avatar: $avatar");
+
         return SingleChildScrollView(
           padding: const EdgeInsets.all(16),
           child: Column(
