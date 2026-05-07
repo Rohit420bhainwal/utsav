@@ -104,16 +104,23 @@ class ProfileScreen extends StatelessWidget {
                     child: CircleAvatar(
                       radius: 50,
                       backgroundColor: AppColors.primary.withOpacity(0.1),
-                      backgroundImage: (avatar != null && avatar.toString().isNotEmpty)
-                          ? NetworkImage(getImageUrl(avatar))
-                          : null,
-                      child: (avatar == null || avatar.toString().isEmpty)
-                          ? Icon(
-                        Icons.person,
-                        size: 50,
-                        color: AppColors.primary,
-                      )
-                          : null,
+                      child: ClipOval(
+                        child: Image.network(
+                          avatar != null && avatar.toString().isNotEmpty
+                              ? getImageUrl(avatar)
+                              : "",
+                          width: 100,
+                          height: 100,
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) {
+                            return Icon(
+                              Icons.person,
+                              size: 50,
+                              color: AppColors.primary,
+                            );
+                          },
+                        ),
+                      ),
                     ),
                   ),
 
@@ -123,7 +130,7 @@ class ProfileScreen extends StatelessWidget {
                     right: 0,
                     child: GestureDetector(
                       onTap: () {
-                        controller.pickAndUpdateImage(); // ✅ upload image
+                        controller.pickAndUpdateImage();
                       },
                       child: Container(
                         padding: const EdgeInsets.all(6),
@@ -170,13 +177,13 @@ class ProfileScreen extends StatelessWidget {
                 ),
                 child: Column(
                   children: [
-                    ListTile(
-                      leading: const Icon(Icons.badge_outlined),
-                      title: const Text("Role"),
-                      subtitle: Text(data["role"] ?? "-"),
-                    ),
-
-                    const Divider(height: 1),
+                    // ListTile(
+                    //   leading: const Icon(Icons.badge_outlined),
+                    //   title: const Text("Role"),
+                    //   subtitle: Text(data["role"] ?? "-"),
+                    // ),
+                    //
+                    // const Divider(height: 1),
 
                     ListTile(
                       leading:

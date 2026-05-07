@@ -168,7 +168,7 @@ class HomeController extends GetxController {
 
         /// 🔥 EMPTY STATE
         if (services.isEmpty) {
-          isError.value = true;
+          /*isError.value = true;*/
           errorMessage.value =
           "No services available in your area yet. We’ll be there soon 🎉";
         }

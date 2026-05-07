@@ -39,9 +39,9 @@ class HomeScreen extends StatelessWidget {
               hint: const Text("Select City"),
               items: controller.cities
                   .map((city) => DropdownMenuItem(
-                value: city,
-                child: Text(city),
-              ))
+                        value: city,
+                        child: Text(city),
+                      ))
                   .toList(),
               onChanged: (value) {
                 if (value != null) {
@@ -60,8 +60,7 @@ class HomeScreen extends StatelessWidget {
               },
               child: CircleAvatar(
                 radius: 18,
-                backgroundColor:
-                AppColors.secondary.withOpacity(0.1),
+                backgroundColor: AppColors.secondary.withOpacity(0.1),
                 child: Icon(
                   Icons.person,
                   color: AppColors.secondary,
@@ -80,8 +79,7 @@ class HomeScreen extends StatelessWidget {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(Icons.wifi_off,
-                    size: 70, color: Colors.grey.shade400),
+                Icon(Icons.wifi_off, size: 70, color: Colors.grey.shade400),
                 const SizedBox(height: 16),
                 Text(
                   controller.errorMessage.value,
@@ -101,13 +99,11 @@ class HomeScreen extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-
               const SizedBox(height: 16),
 
               /// ================= CATEGORY TITLE =================
               Padding(
-                padding:
-                const EdgeInsets.symmetric(horizontal: 16),
+                padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: Text(
                   "Explore Categories",
                   style: textTheme.titleLarge?.copyWith(
@@ -133,13 +129,11 @@ class HomeScreen extends StatelessWidget {
                   height: 45,
                   child: ListView(
                     scrollDirection: Axis.horizontal,
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 16),
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
                     children: [
                       _buildCategoryChip("All"),
                       ...controller.categories
-                          .map((cat) =>
-                          _buildCategoryChip(cat.name))
+                          .map((cat) => _buildCategoryChip(cat.name))
                           .toList(),
                     ],
                   ),
@@ -153,8 +147,7 @@ class HomeScreen extends StatelessWidget {
                 if (controller.isLoading.value) {
                   return const Padding(
                     padding: EdgeInsets.only(top: 50),
-                    child: Center(
-                        child: CircularProgressIndicator()),
+                    child: Center(child: CircularProgressIndicator()),
                   );
                 }
 
@@ -162,41 +155,55 @@ class HomeScreen extends StatelessWidget {
                   return Padding(
                     padding: const EdgeInsets.only(top: 50),
                     child: Center(
-                      child: Text(controller.errorMessage.value),
+                      child: Column(
+                        children: [
+                          Image.asset(
+                            width: double.infinity,
+                            "assets/images/empty.png", // 👈 your image path
+                            height: 150,
+                            fit: BoxFit.scaleDown,
+                          ),
+                          SizedBox(
+                            height: 6,
+                          ),
+                          Padding(
+                            padding: EdgeInsets.only(left: 8.0, right: 8.0),
+                            child: Text(
+                              controller.errorMessage.value,
+                              textAlign: TextAlign.center,
+                              style: textTheme.titleMedium,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   );
                 }
 
                 return GridView.builder(
                   shrinkWrap: true,
-                  physics:
-                  const NeverScrollableScrollPhysics(),
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 16),
+                  physics: const NeverScrollableScrollPhysics(),
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
                   itemCount: controller.services.length,
-                  gridDelegate:
-                  const SliverGridDelegateWithFixedCrossAxisCount(
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: 2,
                     mainAxisSpacing: 16,
                     crossAxisSpacing: 16,
                     childAspectRatio: 0.75,
                   ),
                   itemBuilder: (context, index) {
-                    final service =
-                    controller.services[index];
+                    final service = controller.services[index];
 
                     return GestureDetector(
                       onTap: () {
-                        Get.to(() =>
-                            ServiceDetailsScreen(
+                        Get.to(() => ServiceDetailsScreen(
                               serviceId: service.id,
                             ));
                       },
                       child: Container(
                         decoration: BoxDecoration(
                           color: Colors.white,
-                          borderRadius:
-                          BorderRadius.circular(16),
+                          borderRadius: BorderRadius.circular(16),
                           boxShadow: [
                             BoxShadow(
                               color: Colors.grey.shade200,
@@ -205,104 +212,75 @@ class HomeScreen extends StatelessWidget {
                           ],
                         ),
                         child: Column(
-                          crossAxisAlignment:
-                          CrossAxisAlignment.start,
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-
                             /// ================= SAFE IMAGE =================
                             ClipRRect(
-                              borderRadius:
-                              const BorderRadius.vertical(
+                              borderRadius: const BorderRadius.vertical(
                                 top: Radius.circular(16),
                               ),
                               child: service.images.isNotEmpty
                                   ? Image.network(
-                                controller.apiService
-                                    .getImageUrl(
-                                    service.images[0]),
-                                height: 110,
-                                width: double.infinity,
-                                fit: BoxFit.cover,
+                                      controller.apiService
+                                          .getImageUrl(service.images[0]),
+                                      height: 110,
+                                      width: double.infinity,
+                                      fit: BoxFit.cover,
+                                      loadingBuilder:
+                                          (context, child, progress) {
+                                        if (progress == null) return child;
 
-                                loadingBuilder:
-                                    (context, child,
-                                    progress) {
-                                  if (progress ==
-                                      null) return child;
-
-                                  return Container(
-                                    height: 110,
-                                    color: Colors
-                                        .grey.shade200,
-                                    child:
-                                    const Center(
-                                      child:
-                                      CircularProgressIndicator(
-                                          strokeWidth:
-                                          2),
-                                    ),
-                                  );
-                                },
-
-                                errorBuilder: (context,
-                                    error, stack) {
-                                  return _noImage();
-                                },
-                              )
+                                        return Container(
+                                          height: 110,
+                                          color: Colors.grey.shade200,
+                                          child: const Center(
+                                            child: CircularProgressIndicator(
+                                                strokeWidth: 2),
+                                          ),
+                                        );
+                                      },
+                                      errorBuilder: (context, error, stack) {
+                                        return _noImage();
+                                      },
+                                    )
                                   : _noImage(),
                             ),
 
                             /// ================= TEXT =================
                             Padding(
-                              padding:
-                              const EdgeInsets.all(10),
+                              padding: const EdgeInsets.all(10),
                               child: Column(
-                                crossAxisAlignment:
-                                CrossAxisAlignment
-                                    .start,
+                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
                                     service.title,
                                     maxLines: 1,
-                                    overflow:
-                                    TextOverflow
-                                        .ellipsis,
-                                    style: textTheme
-                                        .titleMedium
-                                        ?.copyWith(
-                                      fontWeight:
-                                      FontWeight.bold,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: textTheme.titleMedium?.copyWith(
+                                      fontWeight: FontWeight.bold,
                                     ),
                                   ),
                                   const SizedBox(height: 6),
                                   Text(
                                     "₹${service.price.toStringAsFixed(0)}",
                                     style: const TextStyle(
-                                      color: AppColors
-                                          .secondary,
-                                      fontWeight:
-                                      FontWeight.bold,
+                                      color: AppColors.secondary,
+                                      fontWeight: FontWeight.bold,
                                     ),
                                   ),
                                   Text(
                                     service.categoryName,
                                     maxLines: 1,
-                                    overflow:
-                                    TextOverflow
-                                        .ellipsis,
-                                    style: textTheme
-                                        .titleSmall
-                                        ?.copyWith(color: AppColors.textPrimary),
+                                    overflow: TextOverflow.ellipsis,
+                                    style: textTheme.titleSmall?.copyWith(
+                                        color: AppColors.textPrimary),
                                   ),
                                   Row(
                                     children: [
                                       Row(
-                                        children:
-                                        List.generate(5, (index) {
+                                        children: List.generate(5, (index) {
                                           return Icon(
-                                            index <
-                                                service.rating
-                                                    .round()
+                                            index < service.rating.round()
                                                 ? Icons.star
                                                 : Icons.star_border,
                                             color: Colors.orange,
@@ -313,18 +291,18 @@ class HomeScreen extends StatelessWidget {
                                       const SizedBox(width: 8),
                                       Text(
                                         service.rating > 0
-                                            ? service.rating
-                                            .toStringAsFixed(1)
+                                            ? service.rating.toStringAsFixed(1)
                                             : "0.0",
-                                        style: textTheme.bodySmall?.copyWith(color: AppColors.primary),
+                                        style: textTheme.bodySmall?.copyWith(
+                                            color: AppColors.primary),
                                         // style: const TextStyle(
                                         //     fontWeight:
                                         //     FontWeight.bold),
                                       ),
-
                                       Text(
                                         "(${service.totalReviews})",
-                                        style: textTheme.bodySmall?.copyWith(color: AppColors.primary),
+                                        style: textTheme.bodySmall?.copyWith(
+                                            color: AppColors.primary),
                                         /*style: TextStyle(
                                           color: Colors.grey.shade600,
                                         ),*/
@@ -353,8 +331,7 @@ class HomeScreen extends StatelessWidget {
   /// ================= CATEGORY CHIP =================
   Widget _buildCategoryChip(String name) {
     return Obx(() {
-      final isSelected =
-          controller.selectedCategory.value == name;
+      final isSelected = controller.selectedCategory.value == name;
 
       return GestureDetector(
         onTap: () {
@@ -362,25 +339,19 @@ class HomeScreen extends StatelessWidget {
         },
         child: Container(
           margin: const EdgeInsets.only(right: 10),
-          padding:
-          const EdgeInsets.symmetric(horizontal: 18),
+          padding: const EdgeInsets.symmetric(horizontal: 18),
           decoration: BoxDecoration(
-            color: isSelected
-                ? AppColors.secondary
-                : Colors.white,
+            color: isSelected ? AppColors.secondary : Colors.white,
             borderRadius: BorderRadius.circular(20),
             border: Border.all(
-              color: isSelected
-                  ? AppColors.secondary
-                  : Colors.grey.shade300,
+              color: isSelected ? AppColors.secondary : Colors.grey.shade300,
             ),
           ),
           alignment: Alignment.center,
           child: Text(
             name,
             style: TextStyle(
-              color:
-              isSelected ? Colors.white : Colors.black,
+              color: isSelected ? Colors.white : Colors.black,
               fontWeight: FontWeight.w500,
             ),
           ),
@@ -398,8 +369,7 @@ class HomeScreen extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: const [
-          Icon(Icons.image_outlined,
-              size: 30, color: Colors.grey),
+          Icon(Icons.image_outlined, size: 30, color: Colors.grey),
           SizedBox(height: 6),
           Text(
             "No Image",
