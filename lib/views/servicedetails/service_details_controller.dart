@@ -22,19 +22,33 @@ class ServiceDetailsController extends GetxController {
     fetchService();
   }
 
+  static const Map<String, String> _pricingLabels = {
+    "per_plate": "Per Plate",
+    "per_day": "Per Day",
+    "per_hour": "Per Hour",
+    "fixed": "Fixed Price",
+    "package": "Package"
+
+  };
+
+  String priceModelConversion(String? pricingModel) {
+    if (pricingModel == null || pricingModel.trim().isEmpty) {
+      return "-";
+    }
+
+    return _pricingLabels[pricingModel.toLowerCase()] ?? "-";
+  }
 
 
   Future<void> fetchService() async {
     try {
       isLoading.value = true;
       isError.value = false;
-
-      final response = await apiService.get(
-        "services/$serviceId",
-        withAuth: false,
-      );
+      print("serviceId: $serviceId");
+      final response = await apiService.get("services/$serviceId", withAuth: false,);
 
       service.value = ServiceModel.fromJson(response["data"]);
+
 
     } on NoInternetException catch (e) {
       errorMessage.value = e.message;

@@ -69,6 +69,7 @@ class ServiceDetailsScreen extends StatelessWidget {
         }
 
         final service = controller.service.value;
+        final priceModel = controller.priceModelConversion(service?.pricingModel??"");
 
         /// ================= EMPTY =================
         if (service == null) {
@@ -301,7 +302,7 @@ class ServiceDetailsScreen extends StatelessWidget {
                                 size: 18,
                                 color: AppColors.green),
                             const SizedBox(width: 4),
-                            Text(service.city,
+                            Text("${service.vendorAddress}-${service.city}",
                               style: textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w900),
                             ),
                           ],
@@ -327,7 +328,7 @@ class ServiceDetailsScreen extends StatelessWidget {
                       MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
-                          "₹${service.price.toStringAsFixed(0)}",
+                          "₹${service.price.toStringAsFixed(0)}/$priceModel",
                           style: textTheme.labelMedium?.copyWith(color: AppColors.secondary,fontWeight: FontWeight.bold),
                           /*style: const TextStyle(
                             color: AppColors.secondary,
