@@ -1,4 +1,5 @@
 import 'package:get/get.dart';
+import '../../model/review_model.dart';
 import '../../model/service_model.dart';
 import '../../services/api_service.dart';
 import '../../utils/api_exceptions.dart';
@@ -14,12 +15,16 @@ class ServiceDetailsController extends GetxController {
   var errorMessage = "".obs;
   var isError = false.obs;
 
+  var reviews = <ReviewModel>[].obs;
+  var isReviewLoading = false.obs;
+
   ServiceDetailsController(this.serviceId);
 
   @override
   void onInit() {
     super.onInit();
     fetchService();
+    fetchReviews();
   }
 
   static const Map<String, String> _pricingLabels = {
@@ -72,6 +77,28 @@ class ServiceDetailsController extends GetxController {
 
     } finally {
       isLoading.value = false;
+    }
+  }
+
+  Future<void> fetchReviews() async {
+    try {
+      isReviewLoading.value = true;
+
+      final response = await apiService.get(
+        "reviews/service/$serviceId",
+        withAuth: false,
+      );
+
+      if (response["success"] == true) {
+        reviews.value = (response["data"] as List)
+            .map((e) => ReviewModel.fromJson(e))
+            .toList();
+      }
+
+    } catch (e) {
+      print("Review Error: $e");
+    } finally {
+      isReviewLoading.value = false;
     }
   }
 }

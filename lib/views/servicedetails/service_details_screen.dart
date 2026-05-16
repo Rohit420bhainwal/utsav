@@ -375,12 +375,157 @@ class ServiceDetailsScreen extends StatelessWidget {
                     ),
                   ),
 
-                  const SizedBox(height: 30),
+                  const SizedBox(height: 20),
+
+                  /// 🔹 REVIEWS
+                  Container(
+                    margin: const EdgeInsets.symmetric(horizontal: 16),
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              "Customer Reviews",
+                              style: textTheme.titleSmall?.copyWith(
+                                color: AppColors.textSecondary,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+
+                            Text(
+                              "${controller.reviews.length} Reviews",
+                              style: textTheme.bodySmall,
+                            ),
+                          ],
+                        ),
+
+                        const SizedBox(height: 16),
+
+                        if (controller.isReviewLoading.value)
+                          const Center(
+                            child: CircularProgressIndicator(),
+                          )
+
+                        else if (controller.reviews.isEmpty)
+                          Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 20),
+                            child: Center(
+                              child: Column(
+                                children: [
+                                  Icon(
+                                    Icons.rate_review_outlined,
+                                    color: Colors.grey.shade400,
+                                    size: 50,
+                                  ),
+                                  const SizedBox(height: 10),
+                                  Text(
+                                    "No reviews yet",
+                                    style: textTheme.bodyMedium?.copyWith(
+                                      color: Colors.grey,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          )
+
+                        else
+                          ListView.separated(
+                            itemCount: controller.reviews.length,
+                            shrinkWrap: true,
+                            physics: const NeverScrollableScrollPhysics(),
+                            separatorBuilder: (_, __) =>
+                            const Divider(height: 24),
+                            itemBuilder: (context, index) {
+                              final review = controller.reviews[index];
+
+                              return Column(
+                                crossAxisAlignment:
+                                CrossAxisAlignment.start,
+                                children: [
+
+                                  /// NAME + RATING
+                                  Row(
+                                    children: [
+
+                                      CircleAvatar(
+                                        radius: 18,
+                                        backgroundColor:
+                                        AppColors.secondary.withOpacity(0.1),
+                                        child: Text(
+                                          review.customerName
+                                              .substring(0, 1)
+                                              .toUpperCase(),
+                                          style: const TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      ),
+
+                                      const SizedBox(width: 10),
+
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              review.customerName,
+                                              style: textTheme.bodyMedium?.copyWith(
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            ),
+
+                                            const SizedBox(height: 4),
+
+                                            Row(
+                                              children: List.generate(
+                                                5,
+                                                    (star) => Icon(
+                                                  star < review.rating.round()
+                                                      ? Icons.star
+                                                      : Icons.star_border,
+                                                  size: 16,
+                                                  color: Colors.orange,
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+
+                                  const SizedBox(height: 12),
+
+                                  Text(
+                                    review.review,
+                                    style: textTheme.bodyMedium?.copyWith(
+                                      color: AppColors.textPrimary,
+                                    ),
+                                  ),
+                                ],
+                              );
+                            },
+                          ),
+                      ],
+                    ),
+                  ),
+
+                /*  const SizedBox(height: 30),*/
                 ],
               ),
             ),
 
-            /// ================= BUTTON =================
+        /*    /// ================= BUTTON =================
             Positioned(
               bottom: 0,
               left: 0,
@@ -426,8 +571,75 @@ class ServiceDetailsScreen extends StatelessWidget {
                   ),
                 ),
               ),
-            ),
+            ),*/
           ],
+        );
+      }),
+      bottomNavigationBar: Obx(() {
+
+        final service = controller.service.value;
+
+        if (service == null) {
+          return const SizedBox.shrink();
+        }
+
+        return SafeArea(
+          child: Container(
+            padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.05),
+                  blurRadius: 10,
+                  offset: const Offset(0, -2),
+                ),
+              ],
+            ),
+            child: SizedBox(
+              height: 52,
+              child: ElevatedButton.icon(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.secondary,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                ),
+
+                icon: const Icon(
+                  Icons.message_rounded,
+                  color: Colors.white,
+                ),
+
+                label: const Text(
+                  "Message Vendor",
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+
+                onPressed: () async {
+                  final result = await Get.to(
+                        () => MessageScreen(
+                      serviceId: service.id,
+                      serviceTitle: service.title,
+                      vendorName: service.vendorName,
+                    ),
+                  );
+
+                  if (result == true) {
+                    Get.snackbar(
+                      "Success",
+                      "Inquiry submitted successfully",
+                      backgroundColor: Colors.green,
+                      colorText: Colors.white,
+                    );
+                  }
+                },
+              ),
+            ),
+          ),
         );
       }),
     );
