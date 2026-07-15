@@ -39,9 +39,9 @@ class HomeScreen extends StatelessWidget {
               hint: const Text("Select City"),
               items: controller.cities
                   .map((city) => DropdownMenuItem(
-                        value: city,
-                        child: Text(city),
-                      ))
+                value: city,
+                child: Text(city),
+              ))
                   .toList(),
               onChanged: (value) {
                 if (value != null) {
@@ -180,138 +180,230 @@ class HomeScreen extends StatelessWidget {
                   );
                 }
 
-                return GridView.builder(
+                return ListView.separated(
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  padding: const EdgeInsets.all(16),
                   itemCount: controller.services.length,
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2,
-                    mainAxisSpacing: 16,
-                    crossAxisSpacing: 16,
-                    childAspectRatio: 0.75,
-                  ),
+                  separatorBuilder: (_, __) => const SizedBox(height: 16),
                   itemBuilder: (context, index) {
                     final service = controller.services[index];
 
-                    return GestureDetector(
+                    return InkWell(
+                      borderRadius: BorderRadius.circular(18),
                       onTap: () {
-                        Get.to(() => ServiceDetailsScreen(
-                              serviceId: service.id,
-                            ));
+                        Get.to(() => ServiceDetailsScreen(serviceId: service.id));
                       },
                       child: Container(
                         decoration: BoxDecoration(
                           color: Colors.white,
-                          borderRadius: BorderRadius.circular(16),
+                          borderRadius: BorderRadius.circular(18),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.grey.shade200,
-                              blurRadius: 6,
-                            )
+                              color: Colors.black.withOpacity(.08),
+                              blurRadius: 10,
+                              offset: const Offset(0, 3),
+                            ),
                           ],
                         ),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            /// ================= SAFE IMAGE =================
-                            ClipRRect(
-                              borderRadius: const BorderRadius.vertical(
-                                top: Radius.circular(16),
-                              ),
-                              child: service.images.isNotEmpty
-                                  ? Image.network(
-                                      controller.apiService
-                                          .getImageUrl(service.images[0]),
-                                      height: 110,
-                                      width: double.infinity,
-                                      fit: BoxFit.cover,
-                                      loadingBuilder:
-                                          (context, child, progress) {
-                                        if (progress == null) return child;
 
-                                        return Container(
-                                          height: 110,
-                                          color: Colors.grey.shade200,
-                                          child: const Center(
-                                            child: CircularProgressIndicator(
-                                                strokeWidth: 2),
-                                          ),
-                                        );
-                                      },
-                                      errorBuilder: (context, error, stack) {
-                                        return _noImage();
-                                      },
-                                    )
-                                  : _noImage(),
+                            /// IMAGE
+                            Stack(
+                              children: [
+                                ClipRRect(
+                                  borderRadius: const BorderRadius.vertical(
+                                    top: Radius.circular(18),
+                                  ),
+                                  child: service.images.isNotEmpty
+                                      ? Image.network(
+                                    controller.apiService
+                                        .getImageUrl(service.images.first),
+                                    height: 180,
+                                    width: double.infinity,
+                                    fit: BoxFit.cover,
+                                    errorBuilder: (_, __, ___) => _noImage(),
+                                  )
+                                      : SizedBox(
+                                    height: 180,
+                                    child: _noImage(),
+                                  ),
+                                ),
+
+                               /* Positioned(
+                                  top: 12,
+                                  right: 12,
+                                  child: Container(
+                                    padding: const EdgeInsets.all(6),
+                                    decoration: const BoxDecoration(
+                                      color: Colors.white,
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: const Icon(
+                                      Icons.favorite_border,
+                                      size: 22,
+                                    ),
+                                  ),
+                                ),*/
+                              ],
                             ),
 
-                            /// ================= TEXT =================
                             Padding(
-                              padding: const EdgeInsets.all(10),
+                              padding: const EdgeInsets.all(14),
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
+
+                                  /// TITLE
                                   Text(
                                     service.title,
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
-                                    style: textTheme.titleMedium?.copyWith(
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 6),
-                                  Text(
-                                    "₹${service.price.toStringAsFixed(0)}",
                                     style: const TextStyle(
-                                      color: AppColors.secondary,
+                                      fontSize: 18,
                                       fontWeight: FontWeight.bold,
                                     ),
                                   ),
-                                  Text(
-                                    service.categoryName,
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: textTheme.titleSmall?.copyWith(
-                                        color: AppColors.textPrimary),
-                                  ),
+
+                                  const SizedBox(height: 6),
+
+                                  /// RATING
                                   Row(
                                     children: [
-                                      Row(
-                                        children: List.generate(5, (index) {
-                                          return Icon(
-                                            index < service.rating.round()
-                                                ? Icons.star
-                                                : Icons.star_border,
-                                            color: Colors.orange,
-                                            size: 10,
-                                          );
-                                        }),
+                                      const Icon(
+                                        Icons.star,
+                                        color: Colors.orange,
+                                        size: 18,
                                       ),
-                                      const SizedBox(width: 8),
+                                      const SizedBox(width: 3),
                                       Text(
-                                        service.rating > 0
-                                            ? service.rating.toStringAsFixed(1)
-                                            : "0.0",
-                                        style: textTheme.bodySmall?.copyWith(
-                                            color: AppColors.primary),
-                                        // style: const TextStyle(
-                                        //     fontWeight:
-                                        //     FontWeight.bold),
+                                        service.rating.toStringAsFixed(1),
+                                        style: const TextStyle(
+                                          color: Colors.orange,
+                                          fontWeight: FontWeight.bold,
+                                        ),
                                       ),
+                                      const SizedBox(width: 4),
                                       Text(
                                         "(${service.totalReviews})",
-                                        style: textTheme.bodySmall?.copyWith(
-                                            color: AppColors.primary),
-                                        /*style: TextStyle(
+                                        style: TextStyle(
                                           color: Colors.grey.shade600,
-                                        ),*/
+                                        ),
                                       ),
                                     ],
                                   ),
+
+                                  const SizedBox(height: 12),
+
+                                  Row(
+                                    children: [
+
+                                      /// CATEGORY CHIP
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 10,
+                                          vertical: 5,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          color: Colors.orange.shade50,
+                                          borderRadius: BorderRadius.circular(8),
+                                        ),
+                                        child: Text(
+                                          service.categoryName,
+                                          style: TextStyle(
+                                            color: Colors.orange.shade700,
+                                            fontWeight: FontWeight.w600,
+                                            fontSize: 12,
+                                          ),
+                                        ),
+                                      ),
+
+                                      const SizedBox(width: 15),
+
+                                      const Icon(
+                                        Icons.location_on_outlined,
+                                        size: 16,
+                                        color: Colors.grey,
+                                      ),
+
+                                      Expanded(
+                                        child: Text(
+                                          service.city,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: const TextStyle(
+                                            color: Colors.grey,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+
+                                  const SizedBox(height: 15),
+
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    crossAxisAlignment: CrossAxisAlignment.center,
+                                    children: [
+                                      Row(
+                                        children: [
+                                          Text(
+                                            "₹${service.price.toStringAsFixed(0)}",
+                                            style: const TextStyle(
+                                              color: Colors.black,
+                                              fontSize: 22,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                          const SizedBox(width: 4),
+                                        ],
+                                      ),
+
+                                      SizedBox(
+                                        height: 38,
+                                        child: ElevatedButton(
+                                          onPressed: () {
+                                            Get.to(() => ServiceDetailsScreen(
+                                              serviceId: service.id,
+                                            ));
+                                          },
+                                          style: ElevatedButton.styleFrom(
+                                            backgroundColor: AppColors.primary,
+                                            elevation: 0,
+                                            padding: const EdgeInsets.symmetric(
+                                              horizontal: 18,
+                                            ),
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius: BorderRadius.circular(10),
+                                            ),
+                                          ),
+                                          child: const Row(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              Text(
+                                                "View Details",
+                                                style: TextStyle(
+                                                  fontSize: 13,
+                                                  fontWeight: FontWeight.w600,
+                                                  color: Colors.white,
+                                                ),
+                                              ),
+                                              SizedBox(width: 4),
+                                              Icon(
+                                                Icons.arrow_forward_ios,
+                                                size: 12,
+                                                color: Colors.white,
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  )
                                 ],
                               ),
-                            ),
+                            )
                           ],
                         ),
                       ),

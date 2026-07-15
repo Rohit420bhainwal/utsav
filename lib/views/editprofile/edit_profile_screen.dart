@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import '../../utils/app_colors.dart';
 import 'edit_profile_controller.dart';
 
 class EditProfileScreen extends StatelessWidget {
@@ -7,11 +8,17 @@ class EditProfileScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
     final controller = Get.put(EditProfileController());
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Edit Profile"),
+        title:  Text("Edit Profile",
+          style: textTheme.titleLarge?.copyWith(
+            color: AppColors.surface,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
         centerTitle: true,
       ),
       body: SingleChildScrollView(

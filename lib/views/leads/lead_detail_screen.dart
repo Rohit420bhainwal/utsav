@@ -12,9 +12,11 @@ class LeadDetailScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
     return Scaffold(
       backgroundColor: AppColors.background,
       resizeToAvoidBottomInset: true,
+
 
       appBar: AppBar(
         elevation: 0,
@@ -22,7 +24,7 @@ class LeadDetailScreen extends StatelessWidget {
         centerTitle: true,
         title: Text(
           "Lead Details",
-          style: TextStyle(
+          style: textTheme.titleLarge?.copyWith(
             color: AppColors.surface,
             fontWeight: FontWeight.w600,
           ),
@@ -47,7 +49,8 @@ class LeadDetailScreen extends StatelessWidget {
         final images = serviceDetails["images"] ?? [];
         final messages = controller.messages;
         final status = lead["status"];
-
+        final eventDate = event["eventDate"]?.toString() ?? "";
+        print("eventDate: ${event["eventDate"]}");
         return LayoutBuilder(
           builder: (context, constraints) {
             return SingleChildScrollView(
@@ -126,9 +129,9 @@ class LeadDetailScreen extends StatelessWidget {
                       children: [
                         _buildRow(
                           Icons.event,
-                          (event["eventDate"] ?? "")
-                              .toString()
-                              .substring(0, 10),
+                          eventDate.length >= 10
+                              ? eventDate.substring(0, 10)
+                              : "Not Available",
                         ),
                         const SizedBox(height: 8),
                         _buildRow(

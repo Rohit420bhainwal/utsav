@@ -12,7 +12,7 @@ class LocalNotificationService {
     const settings = InitializationSettings(android: android);
 
     await _notifications.initialize(
-      settings,
+        settings: settings,
 
       /// 🔥 HANDLE CLICK HERE
       onDidReceiveNotificationResponse: (response) async {
@@ -68,10 +68,10 @@ class LocalNotificationService {
     final payload = "$type|$leadId";
 
     await _notifications.show(
-      0,
-      title,
-      body,
-      details,
+      id: 0,
+      title: title,
+      body: body,
+      notificationDetails: details,
       payload: payload,
     );
   }
