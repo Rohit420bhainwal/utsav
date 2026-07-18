@@ -70,7 +70,7 @@ class ServiceDetailsScreen extends StatelessWidget {
 
         final service = controller.service.value;
         final priceModel = controller.priceModelConversion(service?.pricingModel??"");
-
+        print("service: $service");
         /// ================= EMPTY =================
         if (service == null) {
           return const Center(child: Text("Service not found"));
@@ -112,11 +112,9 @@ class ServiceDetailsScreen extends StatelessWidget {
                         child: PageView.builder(
                           itemCount: service.images.length,
                           itemBuilder: (context, index) {
-                            final imageUrl =
-                            controller.apiService
-                                .getImageUrl(
-                                service.images[index]);
-
+                            final imageUrl =service.images[index];
+                            //controller.apiService.getImageUrl(service.images[index]);
+                            print("imageUrl: $imageUrl");
                             return GestureDetector(
                               onTap: () {
                                 Get.to(() =>
