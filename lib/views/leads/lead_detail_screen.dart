@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../utils/app_colors.dart';
+import '../../utils/message_input_bar.dart';
 import 'lead_detail_controller.dart';
 
 class LeadDetailScreen extends StatelessWidget {
@@ -174,7 +175,7 @@ class LeadDetailScreen extends StatelessWidget {
                     _buildReviewSection(),
 
                   /// 🔥 CHAT
-                  if (status != "closed") ...[
+                  /*if (status != "closed") ...[
                     const SizedBox(height: 10),
                     Text("Conversation",
                         style: TextStyle(fontWeight: FontWeight.w600)),
@@ -213,7 +214,7 @@ class LeadDetailScreen extends StatelessWidget {
                         );
                       },
                     ),
-                  ],
+                  ],*/
                 ],
               ),
             );
@@ -221,7 +222,20 @@ class LeadDetailScreen extends StatelessWidget {
         );
       }),
 
-      /// 🔥 INPUT FIXED (KEYBOARD SAFE)
+      /*bottomNavigationBar: Obx(() {
+        final status = controller.lead.value["status"];
+
+        if (status == "closed") {
+          return const SizedBox();
+        }
+
+        return MessageInputBar(
+          controller: controller.messageController,
+          onSend: controller.sendMessage,
+        );
+      }),*/
+
+     /* /// 🔥 INPUT FIXED (KEYBOARD SAFE)
       bottomNavigationBar: Obx(() {
         final status = controller.lead.value["status"];
         if (status == "closed") return const SizedBox();
@@ -308,7 +322,7 @@ class LeadDetailScreen extends StatelessWidget {
             ),
           ),
         );
-      }),
+      }),*/
     );
   }
 
@@ -380,9 +394,13 @@ class LeadDetailScreen extends StatelessWidget {
 
             const SizedBox(height: 10),
 
-            ElevatedButton(
-              onPressed: controller.submitReview,
-              child: const Text("Submit"),
+            SizedBox(
+              width: double.infinity,
+              height: 48,
+              child: ElevatedButton(
+                onPressed: controller.submitReview,
+                child: const Text("Submit"),
+              ),
             ),
           ],
         ),

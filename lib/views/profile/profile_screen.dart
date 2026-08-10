@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import '../../config/api_config.dart';
 import '../../routes/app_routes.dart';
 import '../../utils/app_colors.dart';
 import '../../services/api_service.dart';
@@ -9,8 +10,7 @@ class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
 
   String getImageUrl(String path) {
-    return "${ApiService.baseUrl.replaceAll('/api/v1', '')}/$path"
-        .replaceAll("\\", "/");
+    return "${ApiConfig.baseUrl.replaceAll('/api/v1', '')}/$path".replaceAll("\\", "/");
   }
 
   @override

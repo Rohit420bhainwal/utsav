@@ -81,14 +81,24 @@ class HomeScreen extends StatelessWidget {
               children: [
                 Icon(Icons.wifi_off, size: 70, color: Colors.grey.shade400),
                 const SizedBox(height: 16),
-                Text(
-                  controller.errorMessage.value,
-                  textAlign: TextAlign.center,
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: Text(
+                    controller.errorMessage.value,
+                    textAlign: TextAlign.center,
+                  ),
                 ),
                 const SizedBox(height: 20),
-                ElevatedButton(
-                  onPressed: () => controller.fetchServices(),
-                  child: const Text("Retry"),
+                SizedBox(
+                  width: double.infinity,
+                  height: 48,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: ElevatedButton(
+                      onPressed: () => controller.fetchServices(),
+                      child: const Text("Retry"),
+                    ),
+                  ),
                 )
               ],
             ),
@@ -219,8 +229,7 @@ class HomeScreen extends StatelessWidget {
                                   ),
                                   child: service.images.isNotEmpty
                                       ? Image.network(
-                                    controller.apiService
-                                        .getImageUrl(service.images.first),
+                                    controller.apiService.getImageUrl(service.images.first),
                                     height: 180,
                                     width: double.infinity,
                                     fit: BoxFit.cover,

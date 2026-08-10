@@ -42,15 +42,18 @@ class HomeController extends GetxController {
       await fetchCities();
 
       /// 2️⃣ Detect user city
-      final userCity = await detectUserCity();
-
+      final detectedCity = await detectUserCity();
       /// 3️⃣ Validate city
-      if (userCity == null) {
+      if (detectedCity == null) {
         errorMessage.value =
         "We couldn’t detect your location. Please enable location services.";
         isError.value = true;
         return;
       }
+
+      /// 🔄 Treat Pimpri-Chinchwad as Pune
+      final userCity = detectedCity == "Pimpri-Chinchwad" ? "Pune" : detectedCity;
+      //final userCity = detectedCity ;
 
       if (!cities.contains(userCity)) {
         /// ❌ NOT SUPPORTED LOCATION
@@ -60,6 +63,7 @@ class HomeController extends GetxController {
         return;
       }
 
+
       /// ✅ SET CITY
       selectedCity.value = userCity;
 
@@ -67,7 +71,10 @@ class HomeController extends GetxController {
       await fetchCategories();
       await fetchServices();
 
-    } catch (e) {
+    } catch (e,stackTrace) {
+      print("❌ INIT FLOW ERROR: $e");
+      print("❌ STACK TRACE: $stackTrace");
+
       isError.value = true;
       errorMessage.value = "Something went wrong. Please try again.";
     } finally {
@@ -81,10 +88,10 @@ class HomeController extends GetxController {
     try {
       final response = await apiService.get("cities");
 
+      print("city_response: $response");
       if (response["success"] == true) {
         final List list = response["data"];
-        cities.value =
-            list.map((e) => e["name"].toString()).toList();
+        cities.value = list.map((e) => e["name"].toString()).toList();
       }
     } catch (e) {
       throw Exception("Failed to load cities");
@@ -113,10 +120,8 @@ class HomeController extends GetxController {
       Position position =
       await Geolocator.getCurrentPosition();
 
-      List<Placemark> placemarks =
-      await placemarkFromCoordinates(
-          position.latitude, position.longitude);
-
+      List<Placemark> placemarks = await placemarkFromCoordinates(position.latitude, position.longitude);
+      print("placemarks: $placemarks");
       return placemarks.first.locality;
 
     } catch (e) {
@@ -130,7 +135,7 @@ class HomeController extends GetxController {
       isCategoryLoading.value = true;
 
       final response = await apiService.get("categories");
-
+      print("categories_response: $response");
       if (response["data"] is List) {
         categories.value = (response["data"] as List)
             .map((e) => CategoryModel.fromJson(e))

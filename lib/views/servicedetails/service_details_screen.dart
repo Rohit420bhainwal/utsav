@@ -295,13 +295,17 @@ class ServiceDetailsScreen extends StatelessWidget {
                         const SizedBox(height: 8),
 
                         Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                              Icon(Icons.location_on,
                                 size: 18,
                                 color: AppColors.green),
                             const SizedBox(width: 4),
-                            Text("${service.vendorAddress}-${service.city}",
-                              style: textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w900),
+                            Expanded(
+                              child: Text("${service.vendorAddress}-${service.city}",
+                                style: textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w900),
+                                softWrap: true,
+                              ),
                             ),
                           ],
                         ),

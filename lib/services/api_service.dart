@@ -1,47 +1,49 @@
+import 'dart:convert';
 import 'dart:io';
 import 'package:get_storage/get_storage.dart';
-import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'package:utsav/services/secure_storage_service.dart';
 import 'package:http_parser/http_parser.dart';
 import 'package:mime/mime.dart';
-
+import 'package:utsav/services/secure_storage_service.dart';
+import '../config/api_config.dart';
+import '../constants/api_constants.dart';
+import '../constants/app_strings.dart';
 import '../utils/api_exceptions.dart';
 
-
 class ApiService {
-  static const String baseUrl = "https://utbackend-api.onrender.com/api/v1";
-  static const String imageBaseUrl = "https://utbackend-api.onrender.com";
-
-/*  static const String baseUrl = "http://10.74.58.50:5000/api/v1";
-  static const String imageBaseUrl = "http://10.74.58.50:5000";*/
-
   final box = GetStorage();
 
-  Future<Map<String, String>> getHeaders({bool withAuth = false}) async {
-    //final userData = box.read("userData");
+  Future<Map<String, String>> getHeaders({
+    bool withAuth = false,
+  }) async {
     final token = await SecureStorageService.getToken();
-    print("token_1: $token");
-    final headers = {"Content-Type": "application/json",
-      "x-app-type": "customer"
+
+    final headers = <String, String>{
+      ApiConstants.contentType: ApiConstants.applicationJson,
+      ApiConstants.appType: ApiConstants.customer,
     };
-    if (withAuth) {
-      if (token != null) {
-        headers["Authorization"] = "Bearer $token";
-      }
+
+    if (withAuth && token != null) {
+      headers[ApiConstants.authorization] =
+      '${ApiConstants.bearer} $token';
     }
+
     return headers;
   }
-// Book@myeyent
+
   Future<Map<String, dynamic>> post(
-      String endpoint, Map<String, dynamic> body,
-      {bool withAuth = false}) async {
-    final url = Uri.parse("$baseUrl/$endpoint");
-    final response = await http.post(url,
-        headers: await getHeaders(withAuth: withAuth),
-        body: jsonEncode(body));
-    // print("status: ${response.statusCode}");
-    // print("body: ${response.body}");
+      String endpoint,
+      Map<String, dynamic> body, {
+        bool withAuth = false,
+      }) async {
+    final url = Uri.parse('${ApiConfig.baseUrl}/$endpoint');
+
+    final response = await http.post(
+      url,
+      headers: await getHeaders(withAuth: withAuth),
+      body: jsonEncode(body),
+    );
+
     return _processResponse(response);
   }
 
@@ -51,12 +53,13 @@ class ApiService {
         Map<String, String>? queryParams,
       }) async {
     try {
-      final uri = Uri.parse("$baseUrl/$endpoint")
+      final uri = Uri.parse('${ApiConfig.baseUrl}/$endpoint')
           .replace(queryParameters: queryParams);
 
-      final response = await http
-          .get(uri, headers: await getHeaders(withAuth: withAuth))
-          .timeout(const Duration(seconds: 15));
+      final response = await http.get(
+        uri,
+        headers: await getHeaders(withAuth: withAuth),
+      ).timeout(ApiConfig.requestTimeout);
 
       return _processResponse(response);
     } on SocketException {
@@ -64,28 +67,29 @@ class ApiService {
     } on TimeoutException {
       throw TimeoutException();
     } catch (e) {
-      throw ApiException("Unexpected error occurred");
+      throw ApiException(AppStrings.unexpectedError);
     }
   }
 
-  Future<Map<String, dynamic>> put(String endpoint, Map<String, dynamic> body,
-      {bool withAuth = false}) async {
-    final url = Uri.parse("$baseUrl/$endpoint");
+  Future<Map<String, dynamic>> put(
+      String endpoint,
+      Map<String, dynamic> body, {
+        bool withAuth = false,
+      }) async {
+    final url = Uri.parse('${ApiConfig.baseUrl}/$endpoint');
+
     final response = await http.put(
       url,
       headers: await getHeaders(withAuth: withAuth),
       body: jsonEncode(body),
     );
 
-    print("PUT $endpoint -> status: ${response.statusCode}");
-    print("PUT $endpoint -> body: ${response.body}");
-
     return _processResponse(response);
   }
 
   Map<String, dynamic> _processResponse(http.Response response) {
     if (response.body.isEmpty) {
-      throw ServerException("Empty response from server");
+      throw ServerException(AppStrings.emptyResponse);
     }
 
     final decodedBody = jsonDecode(response.body);
@@ -96,37 +100,39 @@ class ApiService {
         return decodedBody;
 
       case 400:
-        throw ServerException(decodedBody["message"] ?? "Bad request");
+        throw ServerException(decodedBody["message"] ?? AppStrings.badRequest,);
 
       case 401:
         throw UnauthorizedException();
 
       case 404:
-        throw ServerException("Resource not found");
+        throw ServerException(AppStrings.resourceNotFound);
 
       case 500:
-        throw ServerException("Internal server error");
+        throw ServerException(AppStrings.internalServerError);
 
       default:
-        throw ServerException("Something went wrong");
+        throw ServerException(AppStrings.somethingWentWrong);
     }
   }
 
-  /// 🖼 GET FULL IMAGE URL
   String getImageUrl(String path) {
-    if (path.isEmpty) return "";
+    if (path.isEmpty) {
+      return AppStrings.emptyString;
+    }
 
-    return "$imageBaseUrl/${path.replaceAll("\\", "/")}";
+  //  return '${ApiConfig.imageBaseUrl}/${path.replaceAll("\\", "/")}';
+    return path;
   }
 
   Future<Map<String, dynamic>> multipartPut(
       String endpoint, {
         required Map<String, String> fields,
-        required List<File> files,
+        required List files,
         required String fileKey,
       }) async {
     return _multipartRequest(
-      "PUT",
+      ApiConstants.put,
       endpoint,
       fields: fields,
       files: files,
@@ -134,27 +140,28 @@ class ApiService {
     );
   }
 
-  /// 🔥 COMMON MULTIPART METHOD (REUSABLE)
   Future<Map<String, dynamic>> _multipartRequest(
       String method,
       String endpoint, {
         required Map<String, String> fields,
-        required List<File> files,
+        required List files,
         required String fileKey,
       }) async {
-    final uri = Uri.parse("$baseUrl/$endpoint");
+    final uri = Uri.parse('${ApiConfig.baseUrl}/$endpoint');
 
-    var request = http.MultipartRequest(method, uri);
+    final request = http.MultipartRequest(method, uri);
 
-    /// 🔐 HEADERS
-    request.headers.addAll(await getHeaders(withAuth: true));
+    request.headers.addAll(
+      await getHeaders(withAuth: true),
+    );
 
-    /// 📦 FIELDS
     request.fields.addAll(fields);
 
-    /// 🖼 FILES
-    for (var file in files) {
-      final mimeType = lookupMimeType(file.path) ?? "image/jpeg";
+    for (final file in files) {
+      final mimeType =
+          lookupMimeType(file.path) ??
+              ApiConstants.defaultImageMimeType;
+
       final mimeSplit = mimeType.split('/');
 
       request.files.add(
@@ -169,21 +176,12 @@ class ApiService {
       );
     }
 
-    /// 🚀 SEND
-    var streamedResponse = await request.send();
-    var response = await http.Response.fromStream(streamedResponse);
+    final streamedResponse = await request.send();
 
-    /// 🧪 DEBUG
-    print("$method $endpoint -> STATUS: ${response.statusCode}");
-    print("$method $endpoint -> BODY: ${response.body}");
+    final response = await http.Response.fromStream(
+      streamedResponse,
+    );
 
-    /// ⚠️ SAFE PARSE
-    try {
-      return _processResponse(response);
-    } catch (e) {
-      print("❌ RAW ERROR RESPONSE: ${response.body}");
-      throw Exception("Invalid server response");
-    }
+    return _processResponse(response);
   }
-
 }

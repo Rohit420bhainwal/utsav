@@ -4,6 +4,7 @@ import 'package:in_app_review/in_app_review.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:utsav/services/api_service.dart';
+import '../../config/api_config.dart';
 import '../../routes/app_routes.dart';
 import '../../services/secure_storage_service.dart';
 import '../../utils/app_utils.dart';
@@ -29,14 +30,14 @@ class SettingController extends GetxController {
       url: "https://www.google.com/",
     ));*/
    // AppUtils.openUrl("https://www.termsfeed.com/live/4b3e7855-cf9d-4dc8-a019-87fc4f392581");
-    AppUtils.openUrl("${ApiService.imageBaseUrl}/privacy_policy.html");
+    AppUtils.openUrl("${ApiConfig.imageBaseUrl}/privacy_policy.html");
     /*final url = Uri.parse("https://www.termsfeed.com/live/your-link");
     await launchUrl(url);*/
   }
 
   /// 🔗 Open Terms
   void openTerms() async {
-    AppUtils.openUrl("${ApiService.imageBaseUrl}/terms_conditions.html");
+    AppUtils.openUrl("${ApiConfig.imageBaseUrl}/terms_conditions.html");
     /*final url = Uri.parse("https://your-terms-link.com");
     await launchUrl(url);*/
   }
