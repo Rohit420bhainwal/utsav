@@ -8,4 +8,5 @@ class AppRoutes {
   static const profile = '/profile';
   static const leadDetails = '/lead_details';
   static const verifyOtp = '/verify-otp';
+  static const String forgotPassword = '/forgot-password';
 }

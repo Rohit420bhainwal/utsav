@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:utsav/routes/app_routes.dart';
+
 import 'login_controller.dart';
 
 class LoginScreen extends StatelessWidget {
@@ -27,7 +28,7 @@ class LoginScreen extends StatelessWidget {
               gradient: LinearGradient(
                 colors: [
                   theme.colorScheme.primary,
-                  theme.colorScheme.primary.withValues(alpha: 0.8)
+                  theme.colorScheme.primary.withValues(alpha: 0.8),
                 ],
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
@@ -117,7 +118,24 @@ class LoginScreen extends StatelessWidget {
                         ),
                       ),
 
-                      const SizedBox(height: 30),
+                      const SizedBox(height: 8),
+
+                      // 🔑 Forgot Password
+                      Align(
+                        alignment: Alignment.centerRight,
+                        child: GestureDetector(
+                          onTap: controller.forgotPassword,
+                          child: Text(
+                            'Forgot Password?',
+                            style: TextStyle(
+                              color: theme.colorScheme.primary,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      ),
+
+                      const SizedBox(height: 24),
 
                       // 🔘 Login Button
                       Obx(
@@ -132,14 +150,16 @@ class LoginScreen extends StatelessWidget {
                             ),
                             style: ElevatedButton.styleFrom(
                               shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(30),
+                                borderRadius:
+                                BorderRadius.circular(30),
                               ),
                             ),
                             child: controller.isLoading.value
                                 ? const SizedBox(
                               height: 22,
                               width: 22,
-                              child: CircularProgressIndicator(
+                              child:
+                              CircularProgressIndicator(
                                 strokeWidth: 2,
                                 color: Colors.white,
                               ),

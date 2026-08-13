@@ -70,8 +70,52 @@ class LeadDetailController extends GetxController {
     }
   }
 
-  /// 🔥 SUBMIT REVIEW
   Future<void> submitReview() async {
+    final review = reviewText.value.trim();
+
+    /// 🔥 Validate rating
+    if (selectedRating.value == 0) {
+      Get.dialog(
+        AlertDialog(
+          title: const Text("Rating Required"),
+          content: const Text(
+            "Please select a star rating before submitting your review.",
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Get.back(),
+              child: const Text("OK"),
+            ),
+          ],
+        ),
+        barrierDismissible: false,
+      );
+
+      return;
+    }
+
+    /// 🔥 Validate review
+    if (review.isEmpty) {
+      Get.dialog(
+        AlertDialog(
+          title: const Text("Review Required"),
+          content: const Text(
+            "Please write a review before submitting. "
+                "Share a few words about your experience.",
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Get.back(),
+              child: const Text("OK"),
+            ),
+          ],
+        ),
+        barrierDismissible: false,
+      );
+
+      return;
+    }
+
     try {
       isSubmittingReview.value = true;
 
@@ -80,14 +124,19 @@ class LeadDetailController extends GetxController {
         {
           "leadId": leadId,
           "rating": selectedRating.value.toInt(),
-          "review": reviewText.value,
+          "review": review,
         },
         withAuth: true,
       );
 
       if (res["success"] == true) {
         userReview.value = res["data"];
-        Get.snackbar("Success", "Review submitted");
+
+        Get.snackbar(
+          "Success",
+          "Review submitted successfully",
+          snackPosition: SnackPosition.BOTTOM,
+        );
       }
     } catch (e) {
       print("Submit review error: $e");
@@ -95,6 +144,32 @@ class LeadDetailController extends GetxController {
       isSubmittingReview.value = false;
     }
   }
+
+  // /// 🔥 SUBMIT REVIEW
+  // Future<void> submitReview() async {
+  //   try {
+  //     isSubmittingReview.value = true;
+  //
+  //     final res = await _apiService.post(
+  //       "reviews",
+  //       {
+  //         "leadId": leadId,
+  //         "rating": selectedRating.value.toInt(),
+  //         "review": reviewText.value,
+  //       },
+  //       withAuth: true,
+  //     );
+  //
+  //     if (res["success"] == true) {
+  //       userReview.value = res["data"];
+  //       Get.snackbar("Success", "Review submitted");
+  //     }
+  //   } catch (e) {
+  //     print("Submit review error: $e");
+  //   } finally {
+  //     isSubmittingReview.value = false;
+  //   }
+  // }
 
   /// 🔥 SEND MESSAGE
   Future<void> sendMessage() async {

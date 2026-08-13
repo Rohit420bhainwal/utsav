@@ -38,13 +38,41 @@ class EditProfileController extends GetxController {
     nameController.addListener(_checkForChanges);
     emailController.addListener(_checkForChanges);
     phoneController.addListener(_checkForChanges);
+
+    /// Initial validation
+    _checkForChanges();
+  }
+
+  bool get isFormValid {
+    final name = nameController.text.trim();
+    final email = emailController.text.trim();
+    final phone = phoneController.text.trim();
+
+    // Name validation
+    if (name.isEmpty) {
+      return false;
+    }
+
+    // Email validation
+    if (email.isEmpty || !GetUtils.isEmail(email)) {
+      return false;
+    }
+
+    // Phone validation
+    if (!RegExp(r'^[0-9]{10}$').hasMatch(phone)) {
+      return false;
+    }
+
+    return true;
   }
 
   void _checkForChanges() {
-    hasChanges.value =
+    final hasValueChanged =
         nameController.text.trim() != originalName ||
             emailController.text.trim() != originalEmail ||
             phoneController.text.trim() != originalPhone;
+
+    hasChanges.value = hasValueChanged && isFormValid;
   }
 
   Future<void> updateProfile() async {

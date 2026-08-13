@@ -385,10 +385,31 @@ class LeadDetailScreen extends StatelessWidget {
 
             TextField(
               maxLines: 3,
+              maxLength: 100,
               onChanged: (val) =>
               controller.reviewText.value = val,
-              decoration: const InputDecoration(
+              decoration: InputDecoration(
                 hintText: "Write your review...",
+                  counterText: null,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                  borderSide: BorderSide(
+                    color: Colors.grey.shade300
+                  )
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                  borderSide: BorderSide(
+                    color: Colors.grey.shade300,
+                  ),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                  borderSide: BorderSide(
+                    color: AppColors.primary,
+                    width: 1.5,
+                  ),
+                ),
               ),
             ),
 

@@ -58,16 +58,23 @@ class EditProfileScreen extends StatelessWidget {
               /// PHONE
               TextFormField(
                 controller: controller.phoneController,
-                decoration: const InputDecoration(labelText: "Phone Number"),
+                decoration: const InputDecoration(
+                  labelText: "Phone Number",
+                  counterText: "",
+                ),
                 keyboardType: TextInputType.phone,
                 maxLength: 10,
                 validator: (v) {
-                  if (v == null || v.trim().isEmpty) {
+                  final phone = v?.trim() ?? "";
+
+                  if (phone.isEmpty) {
                     return "Phone number is required";
                   }
-                  if (v.trim().length < 10) {
+
+                  if (!RegExp(r'^[0-9]{10}$').hasMatch(phone)) {
                     return "Enter valid phone number";
                   }
+
                   return null;
                 },
               ),

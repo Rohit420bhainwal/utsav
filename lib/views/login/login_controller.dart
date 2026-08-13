@@ -8,18 +8,51 @@ import '../../services/secure_storage_service.dart';
 class LoginController extends GetxController {
   final isLoading = false.obs;
   final isPasswordVisible = false.obs;
+
   final ApiService _apiService = ApiService();
   final box = GetStorage();
+
+  // ============================================================
+  // 🔐 PASSWORD VISIBILITY
+  // ============================================================
 
   void togglePasswordVisibility() {
     isPasswordVisible.value = !isPasswordVisible.value;
   }
 
+  // ============================================================
+  // 🔑 FORGOT PASSWORD
+  // ============================================================
 
-/*
-  Future<void> login(String email, String password) async {
+  void forgotPassword() {
+    Get.toNamed(AppRoutes.forgotPassword);
+    // Get.snackbar(
+    //   'Forgot Password',
+    //   'Password reset feature is coming soon.',
+    //   snackPosition: SnackPosition.BOTTOM,
+    //   duration: const Duration(seconds: 3),
+    // );
+  }
+
+  // ============================================================
+  // 🔐 LOGIN
+  // ============================================================
+
+  Future<void> login(
+      String email,
+      String password,
+      ) async {
+    // ------------------------------------------------------------
+    // Validation
+    // ------------------------------------------------------------
+
     if (email.isEmpty || password.isEmpty) {
-      Get.snackbar('Error', 'Email and password are required');
+      Get.snackbar(
+        'Error',
+        'Email and password are required',
+        snackPosition: SnackPosition.BOTTOM,
+      );
+
       return;
     }
 
@@ -29,79 +62,70 @@ class LoginController extends GetxController {
       final body = {
         "email": email.trim(),
         "password": password.trim(),
-        "appType": "customer"
+        "appType": "customer",
       };
 
-      final response =
-      await _apiService.post("auth/login", body, withAuth: false);
+      final response = await _apiService.post(
+        "auth/login",
+        body,
+        withAuth: false,
+      );
 
-      print("response: $response");
+      print("Login response: $response");
+
+      // ------------------------------------------------------------
+      // SUCCESS
+      // ------------------------------------------------------------
 
       if (response["success"] == true) {
         final data = response["data"];
 
-        await SecureStorageService.saveToken(data["token"]);
-        await box.write("userProfile", data["user"]);
+        await SecureStorageService.saveToken(
+          data["token"],
+        );
 
-        Get.snackbar('Success', 'Login successful');
-        await Future.delayed(const Duration(seconds: 1));
+        await box.write(
+          "userProfile",
+          data["user"],
+        );
 
-        Get.offAllNamed(AppRoutes.dashboard);
-      } else {
-        final message = response["message"] ?? "";
+        Get.snackbar(
+          'Success',
+          'Login successful',
+          snackPosition: SnackPosition.BOTTOM,
+        );
 
-        /// ✅ HANDLE EMAIL NOT VERIFIED
-        if (message.toLowerCase().contains("verify")) {
-          Get.snackbar('Verify Email', message);
+        await Future.delayed(
+          const Duration(seconds: 1),
+        );
 
-          /// 🔥 Navigate to OTP screen
-          Get.toNamed(
-            AppRoutes.verifyOtp,
-            arguments: {"email": email},
-          );
-        } else {
-          Get.snackbar('Error', message);
-        }
+        Get.offAllNamed(
+          AppRoutes.dashboard,
+        );
+      }
+
+      // ------------------------------------------------------------
+      // API ERROR
+      // ------------------------------------------------------------
+
+      else {
+        final message =
+            response["message"] ?? "Login failed";
+
+        Get.snackbar(
+          'Error',
+          message.toString(),
+          snackPosition: SnackPosition.BOTTOM,
+        );
       }
     } catch (e) {
-      Get.snackbar('Error', 'Login failed');
-    } finally {
-      isLoading.value = false;
-    }
-  }
-*/
+      print("Login error: $e");
 
-
-  Future<void> login(String email, String password) async {
-    if (email.isEmpty || password.isEmpty) {
-      Get.snackbar('Error', 'Email and password are required');
-      return;
-    }
-
-    try {
-      isLoading.value = true;
-      final body = {
-        "email": email.trim(),
-        "password":password.trim(),
-        "appType": "customer"
-
-      };
-      final response = await _apiService.post("auth/login", body,withAuth: false);
-      print("response: $response");
-
-      if (response["success"] == true) {
-        final data = response["data"];
-        await SecureStorageService.saveToken(data["token"]);
-        await box.write("userProfile", data["user"]);
-        Get.snackbar('Success', 'Login successful');
-        await Future.delayed(const Duration(seconds: 2));
-        Get.offAllNamed(AppRoutes.dashboard);
-      }else{
-        final message = response["message"];
-        Get.snackbar('Error', '$message');
-      }
-    } catch (e) {
-      Get.snackbar('Error', 'Login failed');
+      Get.snackbar(
+        'Error',
+        'Login failed. Please try again.',
+        snackPosition: SnackPosition.BOTTOM,
+      );
     } finally {
       isLoading.value = false;
     }

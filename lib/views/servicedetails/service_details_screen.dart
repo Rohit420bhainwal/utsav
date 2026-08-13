@@ -609,12 +609,12 @@ class ServiceDetailsScreen extends StatelessWidget {
                 ),
 
                 icon: const Icon(
-                  Icons.message_rounded,
+                  Icons.send_rounded,
                   color: Colors.white,
                 ),
 
                 label: const Text(
-                  "Message Vendor",
+                  "Send Enquiry",
                   style: TextStyle(
                     color: Colors.white,
                     fontWeight: FontWeight.w600,

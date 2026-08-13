@@ -8,6 +8,7 @@ import 'package:utsav/views/register/register_screen.dart';
 import 'package:utsav/views/splash/splash_screen.dart';
 
 
+import '../views/forgotpassword/forgot_password_screen.dart';
 import '../views/leads/lead_detail_screen.dart';
 import '../views/verifyotp/verify_otp_screen.dart';
 import 'app_routes.dart';
@@ -51,6 +52,11 @@ class AppPages {
     GetPage(
       name: AppRoutes.verifyOtp,
       page: () => VerifyOtpScreen(),
+    ),
+
+    GetPage(
+      name: AppRoutes.forgotPassword,
+      page: () => ForgotPasswordScreen(),
     ),
   ];
 }
