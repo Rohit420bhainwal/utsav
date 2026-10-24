@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:utsav/views/message/message_screen.dart';
@@ -126,86 +127,39 @@ class ServiceDetailsScreen extends StatelessWidget {
                               child: Image.network(
                                 imageUrl,
                                 width: double.infinity,
+                                height: 280,
                                 fit: BoxFit.cover,
 
-                                /// FADE
-                                frameBuilder: (context, child,
-                                    frame, wasSync) {
-                                  if (wasSync) return child;
-                                  return AnimatedOpacity(
-                                    opacity:
-                                    frame == null ? 0 : 1,
-                                    duration:
-                                    const Duration(
-                                        milliseconds: 400),
-                                    child: child,
-                                  );
-                                },
+                                webHtmlElementStrategy: kIsWeb
+                                    ? WebHtmlElementStrategy.prefer
+                                    : WebHtmlElementStrategy.never,
 
-                                /// LOADING
-                                loadingBuilder:
-                                    (context, child, progress) {
-                                  if (progress == null)
+                                loadingBuilder: (context, child, progress) {
+                                  if (progress == null) {
                                     return child;
+                                  }
 
                                   return Container(
                                     height: 280,
-                                    color:
-                                    Colors.grey.shade200,
-                                    child: Column(
-                                      mainAxisAlignment:
-                                      MainAxisAlignment
-                                          .center,
-                                      children: [
-                                        SizedBox(
-                                          height: 28,
-                                          width: 28,
-                                          child:
-                                          CircularProgressIndicator(
-                                            strokeWidth: 2,
-                                            color: AppColors
-                                                .secondary,
-                                          ),
-                                        ),
-                                        const SizedBox(
-                                            height: 10),
-                                        Text(
-                                          "Loading image...",
-                                          style: TextStyle(
-                                            fontSize: 12,
-                                            color: Colors
-                                                .grey.shade600,
-                                          ),
-                                        )
-                                      ],
-                                    ),
+                                    color: Colors.grey.shade200,
+                                    alignment: Alignment.center,
+                                    child: const CircularProgressIndicator(),
                                   );
                                 },
 
-                                /// ERROR IMAGE
-                                errorBuilder:
-                                    (context, error, stack) {
+                                errorBuilder: (context, error, stackTrace) {
+                                  debugPrint('Service Details image failed: $imageUrl');
+                                  debugPrint('$error');
+
                                   return Container(
                                     height: 280,
-                                    color:
-                                    Colors.grey.shade200,
-                                    child: Column(
-                                      mainAxisAlignment:
-                                      MainAxisAlignment
-                                          .center,
-                                      children: const [
-                                        Icon(
-                                            Icons
-                                                .broken_image_outlined,
-                                            size: 50,
-                                            color: Colors.grey),
-                                        SizedBox(height: 10),
-                                        Text(
-                                          "Failed to load image",
-                                          style: TextStyle(
-                                              color: Colors.grey),
-                                        )
-                                      ],
+                                    width: double.infinity,
+                                    color: Colors.grey.shade200,
+                                    alignment: Alignment.center,
+                                    child: const Icon(
+                                      Icons.broken_image_outlined,
+                                      size: 50,
+                                      color: Colors.grey,
                                     ),
                                   );
                                 },
@@ -694,7 +648,23 @@ class _FullScreenImageViewerState
             minScale: 1,
             maxScale: 4,
             child: Center(
-              child: Image.network(imageUrl),
+              child: Image.network(
+                imageUrl,
+                fit: BoxFit.contain,
+                webHtmlElementStrategy: kIsWeb
+                    ? WebHtmlElementStrategy.prefer
+                    : WebHtmlElementStrategy.never,
+                errorBuilder: (context, error, stackTrace) {
+                  debugPrint('Full-screen image failed: $imageUrl');
+                  debugPrint('$error');
+
+                  return const Icon(
+                    Icons.broken_image_outlined,
+                    color: Colors.white,
+                    size: 50,
+                  );
+                },
+              ),
             ),
           );
         },

@@ -1,8 +1,11 @@
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:utsav/views/servicedetails/service_details_screen.dart';
+
 import '../../routes/app_routes.dart';
 import '../../utils/app_colors.dart';
+import '../servicedetails/service_details_screen.dart';
 import 'home_controller.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -10,23 +13,27 @@ class HomeScreen extends StatelessWidget {
 
   final HomeController controller = Get.put(HomeController());
 
+  static const double _maxContentWidth = 1280;
+  static const double _cardSpacing = 20;
+
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
 
     return Scaffold(
-      backgroundColor: Colors.grey.shade100,
+      backgroundColor: const Color(0xFFF7F7F9),
 
-      // ================= APP BAR =================
+      // App bar
       appBar: AppBar(
         backgroundColor: Colors.white,
-        elevation: 1,
+        surfaceTintColor: Colors.white,
+        elevation: 0,
         titleSpacing: 16,
         title: Obx(() {
           if (controller.isCityLoading.value) {
             return const SizedBox(
-              height: 20,
-              width: 20,
+              height: 22,
+              width: 22,
               child: CircularProgressIndicator(strokeWidth: 2),
             );
           }
@@ -36,13 +43,14 @@ class HomeScreen extends StatelessWidget {
               value: controller.selectedCity.value.isEmpty
                   ? null
                   : controller.selectedCity.value,
-              hint: const Text("Select City"),
-              items: controller.cities
-                  .map((city) => DropdownMenuItem(
-                value: city,
-                child: Text(city),
-              ))
-                  .toList(),
+              hint: const Text('Select City'),
+              borderRadius: BorderRadius.circular(12),
+              items: controller.cities.map((city) {
+                return DropdownMenuItem<String>(
+                  value: city,
+                  child: Text(city),
+                );
+              }).toList(),
               onChanged: (value) {
                 if (value != null) {
                   controller.changeCity(value);
@@ -53,407 +61,156 @@ class HomeScreen extends StatelessWidget {
         }),
         actions: [
           Padding(
-            padding: const EdgeInsets.only(right: 12),
-            child: GestureDetector(
-              onTap: () {
-                Get.toNamed(AppRoutes.profile);
-              },
-              child: CircleAvatar(
-                radius: 18,
-                backgroundColor: AppColors.secondary.withOpacity(0.1),
-                child: Icon(
-                  Icons.person,
-                  color: AppColors.secondary,
-                ),
+            padding: const EdgeInsets.only(right: 16),
+            child: IconButton(
+              tooltip: 'Profile',
+              onPressed: () => Get.toNamed(AppRoutes.profile),
+              style: IconButton.styleFrom(
+                backgroundColor: AppColors.secondary.withOpacity(0.10),
+              ),
+              icon: Icon(
+                Icons.person_outline,
+                color: AppColors.secondary,
               ),
             ),
           ),
         ],
       ),
 
-      // ================= BODY =================
-      body: Obx(() {
-        /// 🔴 ERROR STATE
-        if (controller.isError.value) {
-          return Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(Icons.wifi_off, size: 70, color: Colors.grey.shade400),
-                const SizedBox(height: 16),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: Text(
-                    controller.errorMessage.value,
-                    textAlign: TextAlign.center,
-                  ),
-                ),
-                const SizedBox(height: 20),
-                SizedBox(
-                  width: double.infinity,
-                  height: 48,
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    child: ElevatedButton(
-                      onPressed: () => controller.fetchServices(),
-                      child: const Text("Retry"),
+      // Main content
+      body: SafeArea(
+        child: Obx(() {
+          if (controller.isError.value) {
+            return _buildErrorState(context);
+          }
+
+          return LayoutBuilder(
+            builder: (context, viewportConstraints) {
+              return SingleChildScrollView(
+                child: Center(
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(
+                      maxWidth: _maxContentWidth,
                     ),
-                  ),
-                )
-              ],
-            ),
-          );
-        }
-
-        return SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(height: 16),
-
-              /// ================= CATEGORY TITLE =================
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: Text(
-                  "Explore Categories",
-                  style: textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-
-              const SizedBox(height: 12),
-
-              /// ================= CATEGORY LIST =================
-              Obx(() {
-                if (controller.isCategoryLoading.value) {
-                  return const Center(
                     child: Padding(
-                      padding: EdgeInsets.all(20),
-                      child: CircularProgressIndicator(),
-                    ),
-                  );
-                }
-
-                return SizedBox(
-                  height: 45,
-                  child: ListView(
-                    scrollDirection: Axis.horizontal,
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    children: [
-                      _buildCategoryChip("All"),
-                      ...controller.categories
-                          .map((cat) => _buildCategoryChip(cat.name))
-                          .toList(),
-                    ],
-                  ),
-                );
-              }),
-
-              const SizedBox(height: 20),
-
-              /// ================= SERVICES =================
-              Obx(() {
-                if (controller.isLoading.value) {
-                  return const Padding(
-                    padding: EdgeInsets.only(top: 50),
-                    child: Center(child: CircularProgressIndicator()),
-                  );
-                }
-
-                if (controller.services.isEmpty) {
-                  return Padding(
-                    padding: const EdgeInsets.only(top: 50),
-                    child: Center(
+                      padding: EdgeInsets.symmetric(
+                        horizontal:
+                        viewportConstraints.maxWidth < 600 ? 16 : 24,
+                        vertical: 20,
+                      ),
                       child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Image.asset(
-                            width: double.infinity,
-                            "assets/images/empty.png", // 👈 your image path
-                            height: 150,
-                            fit: BoxFit.scaleDown,
-                          ),
-                          SizedBox(
-                            height: 6,
-                          ),
-                          Padding(
-                            padding: EdgeInsets.only(left: 8.0, right: 8.0),
-                            child: Text(
-                              controller.errorMessage.value,
-                              textAlign: TextAlign.center,
-                              style: textTheme.titleMedium,
-                            ),
-                          ),
+                          _buildHeading(context),
+                          const SizedBox(height: 16),
+                          _buildCategories(),
+                          const SizedBox(height: 28),
+                          _buildServices(context),
+                          const SizedBox(height: 24),
                         ],
                       ),
                     ),
-                  );
-                }
-
-                return ListView.separated(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  padding: const EdgeInsets.all(16),
-                  itemCount: controller.services.length,
-                  separatorBuilder: (_, __) => const SizedBox(height: 16),
-                  itemBuilder: (context, index) {
-                    final service = controller.services[index];
-
-                    return InkWell(
-                      borderRadius: BorderRadius.circular(18),
-                      onTap: () {
-                        Get.to(() => ServiceDetailsScreen(serviceId: service.id));
-                      },
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(18),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(.08),
-                              blurRadius: 10,
-                              offset: const Offset(0, 3),
-                            ),
-                          ],
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-
-                            /// IMAGE
-                            Stack(
-                              children: [
-                                ClipRRect(
-                                  borderRadius: const BorderRadius.vertical(
-                                    top: Radius.circular(18),
-                                  ),
-                                  child: service.images.isNotEmpty
-                                      ? Image.network(
-                                    controller.apiService.getImageUrl(service.images.first),
-                                    height: 180,
-                                    width: double.infinity,
-                                    fit: BoxFit.cover,
-                                    errorBuilder: (_, __, ___) => _noImage(),
-                                  )
-                                      : SizedBox(
-                                    height: 180,
-                                    child: _noImage(),
-                                  ),
-                                ),
-
-                               /* Positioned(
-                                  top: 12,
-                                  right: 12,
-                                  child: Container(
-                                    padding: const EdgeInsets.all(6),
-                                    decoration: const BoxDecoration(
-                                      color: Colors.white,
-                                      shape: BoxShape.circle,
-                                    ),
-                                    child: const Icon(
-                                      Icons.favorite_border,
-                                      size: 22,
-                                    ),
-                                  ),
-                                ),*/
-                              ],
-                            ),
-
-                            Padding(
-                              padding: const EdgeInsets.all(14),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-
-                                  /// TITLE
-                                  Text(
-                                    service.title,
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: const TextStyle(
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-
-                                  const SizedBox(height: 6),
-
-                                  /// RATING
-                                  Row(
-                                    children: [
-                                      const Icon(
-                                        Icons.star,
-                                        color: Colors.orange,
-                                        size: 18,
-                                      ),
-                                      const SizedBox(width: 3),
-                                      Text(
-                                        service.rating.toStringAsFixed(1),
-                                        style: const TextStyle(
-                                          color: Colors.orange,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                      const SizedBox(width: 4),
-                                      Text(
-                                        "(${service.totalReviews})",
-                                        style: TextStyle(
-                                          color: Colors.grey.shade600,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-
-                                  const SizedBox(height: 12),
-
-                                  Row(
-                                    children: [
-
-                                      /// CATEGORY CHIP
-                                      Container(
-                                        padding: const EdgeInsets.symmetric(
-                                          horizontal: 10,
-                                          vertical: 5,
-                                        ),
-                                        decoration: BoxDecoration(
-                                          color: Colors.orange.shade50,
-                                          borderRadius: BorderRadius.circular(8),
-                                        ),
-                                        child: Text(
-                                          service.categoryName,
-                                          style: TextStyle(
-                                            color: Colors.orange.shade700,
-                                            fontWeight: FontWeight.w600,
-                                            fontSize: 12,
-                                          ),
-                                        ),
-                                      ),
-
-                                      const SizedBox(width: 15),
-
-                                      const Icon(
-                                        Icons.location_on_outlined,
-                                        size: 16,
-                                        color: Colors.grey,
-                                      ),
-
-                                      Expanded(
-                                        child: Text(
-                                          service.city,
-                                          overflow: TextOverflow.ellipsis,
-                                          style: const TextStyle(
-                                            color: Colors.grey,
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-
-                                  const SizedBox(height: 15),
-
-                                  Row(
-                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                    crossAxisAlignment: CrossAxisAlignment.center,
-                                    children: [
-                                      Row(
-                                        children: [
-                                          Text(
-                                            "₹${service.price.toStringAsFixed(0)}",
-                                            style: const TextStyle(
-                                              color: Colors.black,
-                                              fontSize: 22,
-                                              fontWeight: FontWeight.bold,
-                                            ),
-                                          ),
-                                          const SizedBox(width: 4),
-                                        ],
-                                      ),
-
-                                      SizedBox(
-                                        height: 38,
-                                        child: ElevatedButton(
-                                          onPressed: () {
-                                            Get.to(() => ServiceDetailsScreen(
-                                              serviceId: service.id,
-                                            ));
-                                          },
-                                          style: ElevatedButton.styleFrom(
-                                            backgroundColor: AppColors.primary,
-                                            elevation: 0,
-                                            padding: const EdgeInsets.symmetric(
-                                              horizontal: 18,
-                                            ),
-                                            shape: RoundedRectangleBorder(
-                                              borderRadius: BorderRadius.circular(10),
-                                            ),
-                                          ),
-                                          child: const Row(
-                                            mainAxisSize: MainAxisSize.min,
-                                            children: [
-                                              Text(
-                                                "View Details",
-                                                style: TextStyle(
-                                                  fontSize: 13,
-                                                  fontWeight: FontWeight.w600,
-                                                  color: Colors.white,
-                                                ),
-                                              ),
-                                              SizedBox(width: 4),
-                                              Icon(
-                                                Icons.arrow_forward_ios,
-                                                size: 12,
-                                                color: Colors.white,
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  )
-                                ],
-                              ),
-                            )
-                          ],
-                        ),
-                      ),
-                    );
-                  },
-                );
-              }),
-
-              const SizedBox(height: 30),
-            ],
-          ),
-        );
-      }),
+                  ),
+                ),
+              );
+            },
+          );
+        }),
+      ),
     );
   }
 
-  /// ================= CATEGORY CHIP =================
+  // Heading
+  Widget _buildHeading(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Find your perfect venue',
+          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+            fontWeight: FontWeight.w800,
+            color: const Color(0xFF242424),
+          ),
+        ),
+        const SizedBox(height: 6),
+        Text(
+          'Explore services for your special occasions',
+          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+            color: Colors.grey.shade600,
+          ),
+        ),
+        const SizedBox(height: 24),
+        Text(
+          'Explore Categories',
+          style: Theme.of(context).textTheme.titleLarge?.copyWith(
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      ],
+    );
+  }
+
+  // Categories
+  Widget _buildCategories() {
+    return Obx(() {
+      if (controller.isCategoryLoading.value) {
+        return const SizedBox(
+          height: 48,
+          child: Center(
+            child: CircularProgressIndicator(strokeWidth: 2),
+          ),
+        );
+      }
+
+      return SizedBox(
+        height: 44,
+        child: ListView(
+          scrollDirection: Axis.horizontal,
+          children: [
+            _buildCategoryChip('All'),
+            ...controller.categories.map(
+                  (category) => _buildCategoryChip(category.name),
+            ),
+          ],
+        ),
+      );
+    });
+  }
+
   Widget _buildCategoryChip(String name) {
     return Obx(() {
       final isSelected = controller.selectedCategory.value == name;
 
-      return GestureDetector(
-        onTap: () {
-          controller.changeCategory(name);
-        },
-        child: Container(
-          margin: const EdgeInsets.only(right: 10),
-          padding: const EdgeInsets.symmetric(horizontal: 18),
-          decoration: BoxDecoration(
-            color: isSelected ? AppColors.secondary : Colors.white,
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(
-              color: isSelected ? AppColors.secondary : Colors.grey.shade300,
-            ),
-          ),
-          alignment: Alignment.center,
-          child: Text(
-            name,
-            style: TextStyle(
-              color: isSelected ? Colors.white : Colors.black,
-              fontWeight: FontWeight.w500,
+      return Padding(
+        padding: const EdgeInsets.only(right: 10),
+        child: Material(
+          color: isSelected ? AppColors.secondary : Colors.white,
+          borderRadius: BorderRadius.circular(24),
+          child: InkWell(
+            borderRadius: BorderRadius.circular(24),
+            onTap: () => controller.changeCategory(name),
+            child: Container(
+              padding: const EdgeInsets.symmetric(
+                horizontal: 18,
+                vertical: 10,
+              ),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(24),
+                border: Border.all(
+                  color: isSelected
+                      ? AppColors.secondary
+                      : Colors.grey.shade300,
+                ),
+              ),
+              child: Text(
+                name,
+                style: TextStyle(
+                  color: isSelected ? Colors.white : Colors.black87,
+                  fontWeight:
+                  isSelected ? FontWeight.w600 : FontWeight.w500,
+                  fontSize: 13,
+                ),
+              ),
             ),
           ),
         ),
@@ -461,21 +218,388 @@ class HomeScreen extends StatelessWidget {
     });
   }
 
-  /// ================= NO IMAGE WIDGET =================
+  // Services list/grid
+  Widget _buildServices(BuildContext context) {
+    return Obx(() {
+      if (controller.isLoading.value) {
+        return const Padding(
+          padding: EdgeInsets.symmetric(vertical: 70),
+          child: Center(
+            child: CircularProgressIndicator(),
+          ),
+        );
+      }
+
+      if (controller.services.isEmpty) {
+        return _buildEmptyState(context);
+      }
+
+      return LayoutBuilder(
+        builder: (context, constraints) {
+          final width = constraints.maxWidth;
+
+          // Adapt the number of columns to available space.
+          final int columns;
+          if (width >= 1000) {
+            columns = 3;
+          } else if (width >= 620) {
+            columns = 2;
+          } else {
+            columns = 1;
+          }
+
+          final cardWidth =
+              (width - (_cardSpacing * (columns - 1))) / columns;
+
+          return Wrap(
+            spacing: _cardSpacing,
+            runSpacing: _cardSpacing,
+            children: controller.services.map((service) {
+              return SizedBox(
+                width: cardWidth,
+                child: _buildServiceCard(context, service),
+              );
+            }).toList(),
+          );
+        },
+      );
+    });
+  }
+
+  // Individual service card
+  Widget _buildServiceCard(BuildContext context, dynamic service) {
+    final imageUrl = service.images.isNotEmpty
+        ? controller.apiService.getImageUrl(service.images.first)
+        : null;
+
+    return Material(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(18),
+      clipBehavior: Clip.antiAlias,
+      elevation: 2,
+      shadowColor: Colors.black.withOpacity(0.08),
+      child: InkWell(
+        onTap: () {
+          Get.to(
+                () => ServiceDetailsScreen(serviceId: service.id),
+          );
+        },
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Service image
+            AspectRatio(
+              aspectRatio: 16 / 9,
+              child: imageUrl != null
+                  ? Image.network(
+                imageUrl,
+                width: double.infinity,
+                fit: BoxFit.cover,
+                webHtmlElementStrategy: kIsWeb
+                    ? WebHtmlElementStrategy.prefer
+                    : WebHtmlElementStrategy.never,
+                loadingBuilder: (context, child, progress) {
+                  if (progress == null) {
+                    return child;
+                  }
+
+                  return Container(
+                    color: Colors.grey.shade100,
+                    alignment: Alignment.center,
+                    child: const CircularProgressIndicator(
+                      strokeWidth: 2,
+                    ),
+                  );
+                },
+                errorBuilder: (context, error, stackTrace) {
+                  debugPrint('Service image failed: $error');
+                  return _noImage();
+                },
+              )
+                  : _noImage(),
+            ),
+
+            // Service details
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    service.title,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      fontSize: 17,
+                      height: 1.3,
+                      fontWeight: FontWeight.w700,
+                      color: Color(0xFF242424),
+                    ),
+                  ),
+
+                  const SizedBox(height: 9),
+
+                  // Rating
+                  Row(
+                    children: [
+                      const Icon(
+                        Icons.star_rounded,
+                        color: Colors.orange,
+                        size: 20,
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        service.rating.toStringAsFixed(1),
+                        style: const TextStyle(
+                          color: Colors.orange,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      const SizedBox(width: 5),
+                      Text(
+                        '(${service.totalReviews})',
+                        style: TextStyle(
+                          color: Colors.grey.shade600,
+                          fontSize: 13,
+                        ),
+                      ),
+                    ],
+                  ),
+
+                  const SizedBox(height: 12),
+
+                  // Category and city
+                  Wrap(
+                    spacing: 12,
+                    runSpacing: 8,
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 7,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.orange.shade50,
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Text(
+                          service.categoryName,
+                          style: TextStyle(
+                            color: Colors.orange.shade800,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.location_on_outlined,
+                            size: 17,
+                            color: Colors.grey.shade600,
+                          ),
+                          const SizedBox(width: 3),
+                          ConstrainedBox(
+                            constraints: const BoxConstraints(maxWidth: 150),
+                            child: Text(
+                              service.city,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                color: Colors.grey.shade600,
+                                fontSize: 13,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+
+                  const SizedBox(height: 18),
+
+                  // Price and action button adapt to smaller widths.
+                  Wrap(
+                    alignment: WrapAlignment.spaceBetween,
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    runSpacing: 12,
+                    spacing: 12,
+                    children: [
+                      Text(
+                        '₹${service.price.toStringAsFixed(0)}',
+                        style: const TextStyle(
+                          fontSize: 22,
+                          fontWeight: FontWeight.w800,
+                          color: Color(0xFF202020),
+                        ),
+                      ),
+                      ElevatedButton(
+                        onPressed: () {
+                          Get.to(
+                                () => ServiceDetailsScreen(
+                              serviceId: service.id,
+                            ),
+                          );
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.primary,
+                          foregroundColor: Colors.white,
+                          elevation: 0,
+                          minimumSize: const Size(0, 42),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 11,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                        ),
+                        child: const Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              'View Details',
+                              style: TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            SizedBox(width: 7),
+                            Icon(
+                              Icons.arrow_forward_ios_rounded,
+                              size: 12,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // Empty state
+  Widget _buildEmptyState(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 40),
+      child: Center(
+        child: Column(
+          children: [
+            Image.asset(
+              'assets/images/empty.png',
+              height: 140,
+              fit: BoxFit.contain,
+              errorBuilder: (context, error, stackTrace) {
+                return Icon(
+                  Icons.search_off_rounded,
+                  size: 70,
+                  color: Colors.grey.shade400,
+                );
+              },
+            ),
+            const SizedBox(height: 12),
+            Text(
+              controller.errorMessage.value.isNotEmpty
+                  ? controller.errorMessage.value
+                  : 'No services found.',
+              textAlign: TextAlign.center,
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                color: Colors.grey.shade700,
+              ),
+            ),
+            const SizedBox(height: 8),
+            TextButton.icon(
+              onPressed: () => controller.fetchServices(),
+              icon: const Icon(Icons.refresh),
+              label: const Text('Refresh'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // Network error state
+  Widget _buildErrorState(BuildContext context) {
+    return Center(
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.all(24),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 420),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                Icons.wifi_off_rounded,
+                size: 64,
+                color: Colors.grey.shade400,
+              ),
+              const SizedBox(height: 16),
+              const Text(
+                'Unable to load services',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                controller.errorMessage.value,
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: Colors.grey.shade600,
+                ),
+              ),
+              const SizedBox(height: 24),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton.icon(
+                  onPressed: () => controller.fetchServices(),
+                  icon: const Icon(Icons.refresh),
+                  label: const Text('Retry'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  // Image fallback
   Widget _noImage() {
     return Container(
-      height: 110,
       width: double.infinity,
       color: Colors.grey.shade200,
+      alignment: Alignment.center,
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
-        children: const [
-          Icon(Icons.image_outlined, size: 30, color: Colors.grey),
-          SizedBox(height: 6),
+        children: [
+          Icon(
+            Icons.image_outlined,
+            size: 36,
+            color: Colors.grey.shade500,
+          ),
+          const SizedBox(height: 6),
           Text(
-            "No Image",
-            style: TextStyle(fontSize: 11, color: Colors.grey),
-          )
+            'Image unavailable',
+            style: TextStyle(
+              fontSize: 12,
+              color: Colors.grey.shade600,
+            ),
+          ),
         ],
       ),
     );

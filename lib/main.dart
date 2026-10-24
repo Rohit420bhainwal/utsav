@@ -1,20 +1,28 @@
+
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
+
 import 'package:utsav/services/local_notification_service.dart';
 import 'package:utsav/themes/app_theme.dart';
 import 'package:utsav/routes/app_pages.dart';
 import 'package:utsav/routes/app_routes.dart';
 import 'package:utsav/views/splash/splash_controller.dart';
-
+import 'package:flutter/foundation.dart';
 import 'notification/notification_controller.dart';
+import 'firebase_options.dart';
 
+@pragma('vm:entry-point')
+Future<void> firebaseMessagingBackgroundHandler(
+    RemoteMessage message) async {
+  WidgetsFlutterBinding.ensureInitialized();
 
-Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
-  await Firebase.initializeApp();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
 
   await LocalNotificationService.showNotification(
     title: message.data["title"] ?? "Notification",
@@ -24,27 +32,48 @@ Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   );
 }
 
-void main() async {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  await Firebase.initializeApp();
-  await GetStorage.init(); // ✅ MUST be before usage
-  FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
-  /// 🔥 HANDLE KILLED STATE
-  RemoteMessage? initialMessage =
-  await FirebaseMessaging.instance.getInitialMessage();
-  await LocalNotificationService.init();
-  final details =
-  await FlutterLocalNotificationsPlugin()
-      .getNotificationAppLaunchDetails();
+  // Initialize Firebase with platform-specific configuration.
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+
+  // Initialize local storage.
+  await GetStorage.init();
+
+  // Register Firebase background message handler.
+  FirebaseMessaging.onBackgroundMessage(
+    firebaseMessagingBackgroundHandler,
+  );
+
+  // Handle app launch from a terminated state via notification.
+  RemoteMessage? initialMessage;
+
+  if (!kIsWeb) {
+    initialMessage =
+    await FirebaseMessaging.instance.getInitialMessage();
+  }
+
+  // Initialize local notifications only on supported native platforms.
+  if (!kIsWeb) {
+    await LocalNotificationService.init();
+  }
+
   String? payload;
 
-  if (details?.didNotificationLaunchApp ?? false) {
-    payload = details!.notificationResponse?.payload;
+  if (!kIsWeb) {
+    final details = await FlutterLocalNotificationsPlugin()
+        .getNotificationAppLaunchDetails();
+
+    if (details?.didNotificationLaunchApp ?? false) {
+      payload = details!.notificationResponse?.payload;
+    }
   }
 
   if (initialMessage != null) {
-    print("🔥 MAIN: Opened from notification");
+    debugPrint("MAIN: Opened from notification");
 
     final box = GetStorage();
     box.write("notification_type", initialMessage.data["type"]);
@@ -59,28 +88,13 @@ void main() async {
 class UTsav extends StatelessWidget {
   final String? initialPayload;
 
-  const UTsav({super.key, this.initialPayload});
-
+  const UTsav({
+    super.key,
+    this.initialPayload,
+  });
 
   @override
   Widget build(BuildContext context) {
-
-    /*if (initialPayload != null) {
-      Future.delayed(const Duration(seconds: 1), () {
-        final data = initialPayload!.split("|");
-
-        final type = data[0];
-        final leadId = data.length > 1 ? data[1] : null;
-
-        if (type == "LEAD_STATUS_UPDATE" && leadId != null) {
-          Get.offAllNamed(
-            AppRoutes.leadDetails,
-            arguments: leadId,
-          );
-        }
-      });
-    }*/
-
     return GetMaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'UTsav',
